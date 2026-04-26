@@ -63,7 +63,7 @@ async def require_api_key(
         return "admin_user"
 
     # LOCAL DEV BYPASS: If no token and in dev mode, allow access
-    if settings.env != "production":
+    if settings.environment != "production":
         logger.info("Local Development: Allowing anonymous access")
         return "dev-user"
 
