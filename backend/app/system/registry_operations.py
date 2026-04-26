@@ -118,9 +118,9 @@ class RegistryOperations(SystemController):
                 finally:
                     winreg.CloseKey(key)
             except FileNotFoundError:
-                raise FileNotFoundError(f"Registry key not found: {params['path']}")
+                raise FileNotFoundError(f"Registry key not found: {params['path']}") from None
             except Exception as e:
-                raise Exception(f"Failed to read registry value: {str(e)}")
+                raise Exception(f"Failed to read registry value: {str(e)}") from e
 
         return await self.execute_operation(
             operation_type="registry_read",
@@ -174,7 +174,7 @@ class RegistryOperations(SystemController):
                 finally:
                     winreg.CloseKey(key)
             except Exception as e:
-                raise Exception(f"Failed to write registry value: {str(e)}")
+                raise Exception(f"Failed to write registry value: {str(e)}") from e
 
         return await self.execute_operation(
             operation_type="registry_write",
@@ -221,9 +221,9 @@ class RegistryOperations(SystemController):
             except FileNotFoundError:
                 raise FileNotFoundError(
                     f"Registry value not found: {params['path']}\\{params['value_name']}"
-                )
+                ) from None
             except Exception as e:
-                raise Exception(f"Failed to delete registry value: {str(e)}")
+                raise Exception(f"Failed to delete registry value: {str(e)}") from e
 
         return await self.execute_operation(
             operation_type="registry_delete",
@@ -267,9 +267,9 @@ class RegistryOperations(SystemController):
                 finally:
                     winreg.CloseKey(key)
             except FileNotFoundError:
-                raise FileNotFoundError(f"Registry key not found: {params['path']}")
+                raise FileNotFoundError(f"Registry key not found: {params['path']}") from None
             except Exception as e:
-                raise Exception(f"Failed to list subkeys: {str(e)}")
+                raise Exception(f"Failed to list subkeys: {str(e)}") from e
 
         return await self.execute_operation(
             operation_type="registry_read",
@@ -328,9 +328,9 @@ class RegistryOperations(SystemController):
                 finally:
                     winreg.CloseKey(key)
             except FileNotFoundError:
-                raise FileNotFoundError(f"Registry key not found: {params['path']}")
+                raise FileNotFoundError(f"Registry key not found: {params['path']}") from None
             except Exception as e:
-                raise Exception(f"Failed to list values: {str(e)}")
+                raise Exception(f"Failed to list values: {str(e)}") from e
 
         return await self.execute_operation(
             operation_type="registry_read",

@@ -120,7 +120,7 @@ async def read_file(request: FileReadRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to read file: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/file/write")
@@ -134,7 +134,7 @@ async def write_file(request: FileWriteRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to write file: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/file/delete")
@@ -146,7 +146,7 @@ async def delete_file(request: FileDeleteRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to delete file: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/file/list")
@@ -158,7 +158,7 @@ async def list_directory(request: DirectoryListRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to list directory: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/file/search")
@@ -172,7 +172,7 @@ async def search_files(request: FileSearchRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to search files: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # Process Management Endpoints
@@ -185,7 +185,7 @@ async def list_processes(sort_by: str = "cpu", limit: int | None = None):
         return result
     except Exception as e:
         logger.error(f"Failed to list processes: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/process/info")
@@ -197,7 +197,7 @@ async def get_process_info(pid: int | None = None, name: str | None = None):
         return result
     except Exception as e:
         logger.error(f"Failed to get process info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/process/start")
@@ -211,7 +211,7 @@ async def start_process(request: ProcessStartRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to start process: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/process/kill")
@@ -223,7 +223,7 @@ async def kill_process(request: ProcessKillRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to kill process: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/process/stats")
@@ -235,7 +235,7 @@ async def get_system_stats():
         return result
     except Exception as e:
         logger.error(f"Failed to get system stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # Desktop Automation Endpoints
@@ -248,7 +248,7 @@ async def type_text(request: KeyboardTypeRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to type text: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/automation/press")
@@ -260,7 +260,7 @@ async def press_key(request: KeyPressRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to press key: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/automation/hotkey")
@@ -272,7 +272,7 @@ async def press_hotkey(request: HotkeyRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to press hotkey: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/automation/click")
@@ -286,7 +286,7 @@ async def click_mouse(request: MouseClickRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to click mouse: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/automation/move")
@@ -298,7 +298,7 @@ async def move_mouse(request: MouseMoveRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to move mouse: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/automation/mouse_position")
@@ -310,7 +310,7 @@ async def get_mouse_position():
         return result
     except Exception as e:
         logger.error(f"Failed to get mouse position: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/automation/screen_size")
@@ -322,7 +322,7 @@ async def get_screen_size():
         return result
     except Exception as e:
         logger.error(f"Failed to get screen size: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # System Information Endpoints
@@ -335,7 +335,7 @@ async def get_system_information():
         return result
     except Exception as e:
         logger.error(f"Failed to get system info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/info/cpu")
@@ -347,7 +347,7 @@ async def get_cpu_information(interval: float = 1.0):
         return result
     except Exception as e:
         logger.error(f"Failed to get CPU info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/info/memory")
@@ -359,7 +359,7 @@ async def get_memory_information():
         return result
     except Exception as e:
         logger.error(f"Failed to get memory info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/info/disk")
@@ -371,7 +371,7 @@ async def get_disk_information(path: str = "/"):
         return result
     except Exception as e:
         logger.error(f"Failed to get disk info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/info/network")
@@ -383,7 +383,7 @@ async def get_network_information():
         return result
     except Exception as e:
         logger.error(f"Failed to get network info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/info/battery")
@@ -395,7 +395,7 @@ async def get_battery_information():
         return result
     except Exception as e:
         logger.error(f"Failed to get battery info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # Registry Operations Endpoints (Windows only)
@@ -408,7 +408,7 @@ async def read_registry_value(request: RegistryReadRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to read registry: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/registry/write")
@@ -422,7 +422,7 @@ async def write_registry_value(request: RegistryWriteRequest):
         return result
     except Exception as e:
         logger.error(f"Failed to write registry: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/registry/subkeys")
@@ -434,7 +434,7 @@ async def list_registry_subkeys(path: str):
         return result
     except Exception as e:
         logger.error(f"Failed to list subkeys: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/registry/values")
@@ -446,7 +446,7 @@ async def list_registry_values(path: str):
         return result
     except Exception as e:
         logger.error(f"Failed to list values: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # Security & Approval Endpoints
@@ -533,7 +533,7 @@ async def approve_operation(request: ApprovalRequest):
 
     except Exception as e:
         logger.error(f"Failed to approve operation: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/operations/pending")
@@ -545,7 +545,7 @@ async def get_pending_operations():
         return {"operations": operations}
     except Exception as e:
         logger.error(f"Failed to get pending operations: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/operations/history")
@@ -557,4 +557,4 @@ async def get_operation_history(limit: int = 100):
         return {"operations": history, "count": len(history)}
     except Exception as e:
         logger.error(f"Failed to get operation history: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

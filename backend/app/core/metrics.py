@@ -4,6 +4,7 @@ Metrics & Observability for AIZEN
 Prometheus-compatible metrics for monitoring performance.
 """
 
+import asyncio
 import logging
 import threading
 import time
@@ -127,7 +128,7 @@ class MetricsCollector:
         for key, value in self._gauges.items():
             lines.append(f"aizen_{key} {value}")
 
-        # Histograms (simplified)
+        # Collect Histograms (stat summary)
         for key, values in self._histograms.items():
             if values:
                 stats = self.get_histogram_stats(key)
@@ -221,5 +222,4 @@ def timed(metric_name: str, labels: dict[str, str] | None = None):
     return decorator
 
 
-# Import asyncio for the decorator check
-import asyncio
+# asyncio is imported at the top level

@@ -65,7 +65,7 @@ class CoreMemory:
                 if isinstance(profile.get("content"), str):
                     try:
                         memory = json.loads(profile["content"])
-                    except:
+                    except Exception:
                         memory = self._create_default_memory()
                 else:
                     memory = self._create_default_memory()

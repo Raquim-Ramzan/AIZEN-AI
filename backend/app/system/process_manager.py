@@ -101,7 +101,7 @@ class ProcessManager(SystemController):
                 try:
                     proc = psutil.Process(params["pid"])
                 except psutil.NoSuchProcess:
-                    raise ValueError(f"Process with PID {params['pid']} not found")
+                    raise ValueError(f"Process with PID {params['pid']} not found") from None
             elif params["name"]:
                 # Find process by name
                 found = False
@@ -227,7 +227,7 @@ class ProcessManager(SystemController):
 
                     terminated.append({"pid": params["pid"], "name": proc_name})
                 except psutil.NoSuchProcess:
-                    raise ValueError(f"Process with PID {params['pid']} not found")
+                    raise ValueError(f"Process with PID {params['pid']} not found") from None
 
             elif params["name"]:
                 # Find and kill all processes with this name

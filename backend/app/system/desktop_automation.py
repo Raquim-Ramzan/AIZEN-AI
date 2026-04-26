@@ -16,12 +16,8 @@ except ImportError:
     logger.warning("PyAutoGUI not found. Desktop automation disabled.")
     HAS_PYAUTOGUI = False
 
-try:
-    import pywinauto
-
-    HAS_PYWINAUTO = True
-except ImportError:
-    HAS_PYWINAUTO = False
+# HAS_PYWINAUTO flag for future use or downstream compatibility
+HAS_PYWINAUTO = False
 
 
 class DesktopAutomation(SystemController):

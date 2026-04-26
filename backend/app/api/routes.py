@@ -51,7 +51,7 @@ async def get_conversations(
         return conversations
     except Exception as e:
         logger.error(f"Get conversations error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/conversations", response_model=ConversationResponse)
@@ -66,7 +66,7 @@ async def create_conversation(
         return conversation
     except Exception as e:
         logger.error(f"Create conversation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationResponse)
@@ -84,7 +84,7 @@ async def get_conversation(
         raise
     except Exception as e:
         logger.error(f"Get conversation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.delete("/conversations/{conversation_id}")
@@ -98,7 +98,7 @@ async def delete_conversation(
         return {"status": "deleted", "conversation_id": conversation_id}
     except Exception as e:
         logger.error(f"Delete conversation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.put("/conversations/{conversation_id}", response_model=ConversationResponse)
@@ -124,7 +124,7 @@ async def update_conversation(
         raise
     except Exception as e:
         logger.error(f"Update conversation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageResponse])
@@ -141,7 +141,7 @@ async def get_messages(
         return messages
     except Exception as e:
         logger.error(f"Get messages error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/chat")
@@ -200,7 +200,7 @@ async def chat(
 Today is {now.strftime("%A, %B %d, %Y")}
 Current time is {now.strftime("%I:%M %p")} IST
 Current year: {now.year}"""
-        except:
+        except Exception:
             now = datetime.now()
             datetime_context = f"""=== CURRENT DATE & TIME ===
 Today is {now.strftime("%A, %B %d, %Y")}
@@ -360,7 +360,7 @@ For example:
 
     except Exception as e:
         logger.error(f"Chat error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/memory/core")
@@ -372,7 +372,7 @@ async def get_core_memory(request: Request, user_id: str = Depends(require_api_k
         return memory
     except Exception as e:
         logger.error(f"Get core memory error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/memory/preference")
@@ -386,7 +386,7 @@ async def update_preference(
         return {"status": "updated", "key": update.key}
     except Exception as e:
         logger.error(f"Update preference error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/memory/fact")
@@ -402,7 +402,7 @@ async def store_fact(request: Request, fact: FactStore, user_id: str = Depends(r
         return {"status": "stored", "id": doc_id}
     except Exception as e:
         logger.error(f"Store fact error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/memory/search")
@@ -416,7 +416,7 @@ async def search_memory(
         return {"query": query, "results": results}
     except Exception as e:
         logger.error(f"Memory search error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # ============================================
@@ -433,7 +433,7 @@ async def get_core_facts(request: Request, user_id: str = Depends(require_api_ke
         return {"facts": facts, "count": len(facts)}
     except Exception as e:
         logger.error(f"Get core facts error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/memory/facts")
@@ -457,7 +457,7 @@ async def add_core_fact(
             return {"status": "duplicate", "message": "Fact already exists"}
     except Exception as e:
         logger.error(f"Add core fact error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.put("/memory/facts")
@@ -479,7 +479,7 @@ async def update_core_fact(
         raise
     except Exception as e:
         logger.error(f"Update core fact error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.delete("/memory/facts/{fact_id}")
@@ -497,7 +497,7 @@ async def delete_core_fact(request: Request, fact_id: str, user_id: str = Depend
         raise
     except Exception as e:
         logger.error(f"Delete core fact error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/memory/facts/clear")
@@ -511,7 +511,7 @@ async def clear_core_facts(
         return {"status": "cleared", "keep_identity": clear_data.keep_identity}
     except Exception as e:
         logger.error(f"Clear core facts error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/tools")
@@ -522,7 +522,7 @@ async def get_tools():
         return {"tools": tools}
     except Exception as e:
         logger.error(f"Get tools error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/tools/execute")
@@ -533,7 +533,7 @@ async def execute_tool(tool_req: ToolExecuteRequest):
         return result
     except Exception as e:
         logger.error(f"Tool execution error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/settings")
@@ -605,7 +605,7 @@ async def select_model(select_req: ModelSelectRequest):
             "selected_model": model,
         }
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid task type: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid task type: {e}") from e
 
 
 @router.post("/image/generate", deprecated=True)
@@ -642,7 +642,7 @@ async def get_rag_stats(request: Request, user_id: str = Depends(require_api_key
         return stats
     except Exception as e:
         logger.error(f"Get RAG stats error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/rag/rebuild")
@@ -657,7 +657,7 @@ async def rebuild_rag_index(request: Request, user_id: str = Depends(require_api
         return {"status": "completed", "result": result}
     except Exception as e:
         logger.error(f"Rebuild RAG index error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/rag/search")
@@ -672,7 +672,7 @@ async def search_rag(request: Request, query: str, limit: int = 10):
         return {"query": query, "results": results}
     except Exception as e:
         logger.error(f"RAG search error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/rag/context")
@@ -693,7 +693,7 @@ async def get_rag_context(request: Request, query: str, conversation_id: str = N
         return context
     except Exception as e:
         logger.error(f"Get RAG context error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/rag/summarize/{conversation_id}")
@@ -716,7 +716,7 @@ async def summarize_conversation(request: Request, conversation_id: str, force: 
             }
     except Exception as e:
         logger.error(f"Summarize conversation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # =====================================================
@@ -735,7 +735,7 @@ async def create_backup(request: Request):
         return result
     except Exception as e:
         logger.error(f"Backup error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/backup/list")
@@ -749,7 +749,7 @@ async def list_backups(request: Request):
         return {"backups": backups}
     except Exception as e:
         logger.error(f"List backups error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/export")
@@ -763,7 +763,7 @@ async def export_data(request: Request, format: str = "json"):
         return {"status": "success", "export_path": str(export_path)}
     except Exception as e:
         logger.error(f"Export error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # =====================================================
@@ -790,7 +790,7 @@ async def get_audit_logs(request: Request, event_type: str = None, limit: int = 
         return {"events": events}
     except Exception as e:
         logger.error(f"Audit log error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/audit/stats")
@@ -804,7 +804,7 @@ async def get_audit_stats(request: Request):
         return stats
     except Exception as e:
         logger.error(f"Audit stats error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # =====================================================
@@ -822,7 +822,7 @@ async def get_cache_stats(request: Request):
         return stats
     except Exception as e:
         logger.error(f"Cache stats error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/cache/clear")
@@ -835,7 +835,7 @@ async def clear_caches(request: Request):
         return {"status": "success", "message": "All caches cleared"}
     except Exception as e:
         logger.error(f"Clear cache error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # =====================================================
@@ -854,4 +854,4 @@ async def add_smart_memory(request: Request, fact: str, importance: str = "norma
         return result
     except Exception as e:
         logger.error(f"Smart memory add error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
