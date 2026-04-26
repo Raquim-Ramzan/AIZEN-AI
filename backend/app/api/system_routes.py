@@ -3,17 +3,18 @@ System Operations API Routes
 REST endpoints for system-level operations
 """
 
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional, List
 import logging
+from typing import Any
 
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+from app.core.security_manager import get_security_manager
+from app.system.desktop_automation import get_desktop_automation
 from app.system.file_operations import get_file_operations
 from app.system.process_manager import get_process_manager
-from app.system.desktop_automation import get_desktop_automation
-from app.system.system_info import get_system_info
 from app.system.registry_operations import get_registry_operations
-from app.core.security_manager import get_security_manager
+from app.system.system_info import get_system_info
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/system", tags=["system"])
@@ -22,7 +23,7 @@ router = APIRouter(prefix="/api/system", tags=["system"])
 # Request/Response Models
 class FileReadRequest(BaseModel):
     path: str
-    encoding: Optional[str] = None
+    encoding: str | None = None
 
 
 class FileWriteRequest(BaseModel):
@@ -51,14 +52,14 @@ class FileSearchRequest(BaseModel):
 
 class ProcessStartRequest(BaseModel):
     command: str
-    args: Optional[List[str]] = None
-    cwd: Optional[str] = None
+    args: list[str] | None = None
+    cwd: str | None = None
     wait: bool = False
 
 
 class ProcessKillRequest(BaseModel):
-    pid: Optional[int] = None
-    name: Optional[str] = None
+    pid: int | None = None
+    name: str | None = None
     force: bool = False
 
 
@@ -74,15 +75,15 @@ class KeyPressRequest(BaseModel):
 
 
 class HotkeyRequest(BaseModel):
-    keys: List[str]
+    keys: list[str]
 
 
 class MouseClickRequest(BaseModel):
-    x: Optional[int] = None
-    y: Optional[int] = None
+    x: int | None = None
+    y: int | None = None
     clicks: int = 1
     interval: float = 0.0
-    button: str = 'left'
+    button: str = "left"
 
 
 class MouseMoveRequest(BaseModel):
@@ -128,10 +129,7 @@ async def write_file(request: FileWriteRequest):
     try:
         file_ops = get_file_operations()
         result = await file_ops.write_file(
-            request.path,
-            request.content,
-            request.encoding,
-            request.create_dirs
+            request.path, request.content, request.encoding, request.create_dirs
         )
         return result
     except Exception as e:
@@ -156,11 +154,7 @@ async def list_directory(request: DirectoryListRequest):
     """List directory contents"""
     try:
         file_ops = get_file_operations()
-        result = await file_ops.list_directory(
-            request.path,
-            request.recursive,
-            request.pattern
-        )
+        result = await file_ops.list_directory(request.path, request.recursive, request.pattern)
         return result
     except Exception as e:
         logger.error(f"Failed to list directory: {e}")
@@ -173,9 +167,7 @@ async def search_files(request: FileSearchRequest):
     try:
         file_ops = get_file_operations()
         result = await file_ops.search_files(
-            request.start_path,
-            request.pattern,
-            request.max_results
+            request.start_path, request.pattern, request.max_results
         )
         return result
     except Exception as e:
@@ -185,7 +177,7 @@ async def search_files(request: FileSearchRequest):
 
 # Process Management Endpoints
 @router.get("/process/list")
-async def list_processes(sort_by: str = "cpu", limit: Optional[int] = None):
+async def list_processes(sort_by: str = "cpu", limit: int | None = None):
     """List running processes"""
     try:
         proc_mgr = get_process_manager()
@@ -197,7 +189,7 @@ async def list_processes(sort_by: str = "cpu", limit: Optional[int] = None):
 
 
 @router.get("/process/info")
-async def get_process_info(pid: Optional[int] = None, name: Optional[str] = None):
+async def get_process_info(pid: int | None = None, name: str | None = None):
     """Get process information"""
     try:
         proc_mgr = get_process_manager()
@@ -214,10 +206,7 @@ async def start_process(request: ProcessStartRequest):
     try:
         proc_mgr = get_process_manager()
         result = await proc_mgr.start_process(
-            request.command,
-            request.args,
-            request.cwd,
-            request.wait
+            request.command, request.args, request.cwd, request.wait
         )
         return result
     except Exception as e:
@@ -230,11 +219,7 @@ async def kill_process(request: ProcessKillRequest):
     """Kill a process"""
     try:
         proc_mgr = get_process_manager()
-        result = await proc_mgr.kill_process(
-            request.pid,
-            request.name,
-            request.force
-        )
+        result = await proc_mgr.kill_process(request.pid, request.name, request.force)
         return result
     except Exception as e:
         logger.error(f"Failed to kill process: {e}")
@@ -271,11 +256,7 @@ async def press_key(request: KeyPressRequest):
     """Press a key"""
     try:
         automation = get_desktop_automation()
-        result = await automation.press_key(
-            request.key,
-            request.presses,
-            request.interval
-        )
+        result = await automation.press_key(request.key, request.presses, request.interval)
         return result
     except Exception as e:
         logger.error(f"Failed to press key: {e}")
@@ -300,11 +281,7 @@ async def click_mouse(request: MouseClickRequest):
     try:
         automation = get_desktop_automation()
         result = await automation.click(
-            request.x,
-            request.y,
-            request.clicks,
-            request.interval,
-            request.button
+            request.x, request.y, request.clicks, request.interval, request.button
         )
         return result
     except Exception as e:
@@ -317,11 +294,7 @@ async def move_mouse(request: MouseMoveRequest):
     """Move mouse"""
     try:
         automation = get_desktop_automation()
-        result = await automation.move_mouse(
-            request.x,
-            request.y,
-            request.duration
-        )
+        result = await automation.move_mouse(request.x, request.y, request.duration)
         return result
     except Exception as e:
         logger.error(f"Failed to move mouse: {e}")
@@ -444,10 +417,7 @@ async def write_registry_value(request: RegistryWriteRequest):
     try:
         reg_ops = get_registry_operations()
         result = await reg_ops.write_value(
-            request.path,
-            request.value_name,
-            request.value,
-            request.value_type
+            request.path, request.value_name, request.value, request.value_type
         )
         return result
     except Exception as e:
@@ -485,99 +455,85 @@ async def approve_operation(request: ApprovalRequest):
     """Approve or deny a pending operation"""
     try:
         from app.core.system_executor import get_system_executor
-        
+
         security_mgr = get_security_manager()
-        system_executor = get_system_executor()
-        
+        get_system_executor()
+
         # Get the pending operation
         if request.operation_id not in security_mgr.pending_operations:
             raise HTTPException(status_code=404, detail="Operation not found")
-        
+
         operation = security_mgr.pending_operations[request.operation_id]
-        
+
         # Approve or deny
-        security_mgr.approve_operation(
-            request.operation_id,
-            request.approved,
-            request.remember
-        )
-        
+        security_mgr.approve_operation(request.operation_id, request.approved, request.remember)
+
         # If approved, execute the operation
         if request.approved:
             logger.info(f"Executing approved operation: {request.operation_id}")
-            
+
             # Get the tool name and parameters from the operation
-            tool_name = operation.parameters.get("_tool_name")
+            operation.parameters.get("_tool_name")
             tool_params = {k: v for k, v in operation.parameters.items() if k != "_tool_name"}
-            
+
             # Execute the actual operation based on operation type
             result = None
             if operation.operation_type == "url_open":
                 import webbrowser
+
                 url = tool_params.get("url")
                 webbrowser.open(url)
                 result = {"url": url, "opened": True}
             elif operation.operation_type == "process_start":
                 proc_mgr = get_process_manager()
                 result = await proc_mgr.start_process(
-                    command=tool_params.get("command"),
-                    args=tool_params.get("args", []),
-                    wait=False
+                    command=tool_params.get("command"), args=tool_params.get("args", []), wait=False
                 )
             elif operation.operation_type == "file_write":
                 file_ops = get_file_operations()
                 result = await file_ops.write_file(
                     path=tool_params.get("path"),
                     content=tool_params.get("content"),
-                    create_dirs=tool_params.get("create_dirs", True)
+                    create_dirs=tool_params.get("create_dirs", True),
                 )
             elif operation.operation_type == "file_delete":
                 file_ops = get_file_operations()
                 result = await file_ops.delete_file(
                     path=tool_params.get("path"),
-                    use_recycle_bin=tool_params.get("use_recycle_bin", True)
+                    use_recycle_bin=tool_params.get("use_recycle_bin", True),
                 )
             elif operation.operation_type == "process_kill":
                 proc_mgr = get_process_manager()
                 result = await proc_mgr.kill_process(
                     pid=tool_params.get("pid"),
                     name=tool_params.get("name"),
-                    force=tool_params.get("force", False)
+                    force=tool_params.get("force", False),
                 )
             elif operation.operation_type == "keyboard_type":
                 automation = get_desktop_automation()
                 result = await automation.type_text(
-                    text=tool_params.get("text"),
-                    interval=tool_params.get("interval", 0.01)
+                    text=tool_params.get("text"), interval=tool_params.get("interval", 0.01)
                 )
-            
+
             # Update operation with result
             from app.core.security_manager import OperationStatus
+
             operation.status = OperationStatus.COMPLETED
             operation.result = result
             security_mgr.log_operation(operation)
-            
+
             # Remove from pending
             del security_mgr.pending_operations[request.operation_id]
-            
-            return {
-                "success": True,
-                "operation_id": request.operation_id,
-                "result": result
-            }
+
+            return {"success": True, "operation_id": request.operation_id, "result": result}
         else:
             # Remove from pending if denied
             del security_mgr.pending_operations[request.operation_id]
-            return {
-                "success": True,
-                "operation_id": request.operation_id,
-                "denied": True
-            }
-            
+            return {"success": True, "operation_id": request.operation_id, "denied": True}
+
     except Exception as e:
         logger.error(f"Failed to approve operation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
 
 
 @router.get("/operations/pending")

@@ -4,14 +4,15 @@ Defines all system operations as callable tools for the AI assistant
 """
 
 import logging
-from typing import List, Dict, Any, Optional
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class SystemToolCategory(Enum):
     """Categories of system tools"""
+
     FILE = "file"
     PROCESS = "process"
     DESKTOP = "desktop"
@@ -32,16 +33,16 @@ SYSTEM_TOOLS = [
                 "properties": {
                     "url": {
                         "type": "string",
-                        "description": "The URL to open (e.g., 'https://youtube.com', 'https://google.com/search?q=python')"
+                        "description": "The URL to open (e.g., 'https://youtube.com', 'https://google.com/search?q=python')",
                     },
                     "reason": {
                         "type": "string",
-                        "description": "Brief explanation of why opening this URL"
-                    }
+                        "description": "Brief explanation of why opening this URL",
+                    },
                 },
-                "required": ["url"]
-            }
-        }
+                "required": ["url"],
+            },
+        },
     },
     {
         "type": "function",
@@ -50,17 +51,11 @@ SYSTEM_TOOLS = [
             "description": "Search the web for current information, facts, or news using Perplexity AI. Use this when you need up-to-date information that you don't have in your training data.",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "The search query"
-                    }
-                },
-                "required": ["query"]
-            }
-        }
+                "properties": {"query": {"type": "string", "description": "The search query"}},
+                "required": ["query"],
+            },
+        },
     },
-    
     # ============ PROCESS OPERATIONS ============
     {
         "type": "function",
@@ -72,21 +67,21 @@ SYSTEM_TOOLS = [
                 "properties": {
                     "command": {
                         "type": "string",
-                        "description": "Name or path of the executable (e.g., 'notepad.exe', 'calc.exe', 'C:\\Program Files\\Chrome\\chrome.exe')"
+                        "description": "Name or path of the executable (e.g., 'notepad.exe', 'calc.exe', 'C:\\Program Files\\Chrome\\chrome.exe')",
                     },
                     "args": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "Optional command-line arguments"
+                        "description": "Optional command-line arguments",
                     },
                     "reason": {
                         "type": "string",
-                        "description": "Brief explanation of why starting this process"
-                    }
+                        "description": "Brief explanation of why starting this process",
+                    },
                 },
-                "required": ["command"]
-            }
-        }
+                "required": ["command"],
+            },
+        },
     },
     {
         "type": "function",
@@ -99,16 +94,16 @@ SYSTEM_TOOLS = [
                     "sort_by": {
                         "type": "string",
                         "enum": ["cpu", "memory", "name", "pid"],
-                        "description": "How to sort the process list"
+                        "description": "How to sort the process list",
                     },
                     "limit": {
                         "type": "integer",
-                        "description": "Maximum number of processes to return (default 10)"
-                    }
+                        "description": "Maximum number of processes to return (default 10)",
+                    },
                 },
-                "required": []
-            }
-        }
+                "required": [],
+            },
+        },
     },
     {
         "type": "function",
@@ -120,22 +115,18 @@ SYSTEM_TOOLS = [
                 "properties": {
                     "name": {
                         "type": "string",
-                        "description": "Process name (e.g., 'chrome.exe', 'notepad.exe')"
+                        "description": "Process name (e.g., 'chrome.exe', 'notepad.exe')",
                     },
-                    "pid": {
-                        "type": "integer",
-                        "description": "Process ID (alternative to name)"
-                    },
+                    "pid": {"type": "integer", "description": "Process ID (alternative to name)"},
                     "force": {
                         "type": "boolean",
-                        "description": "Use force kill (default false for graceful termination)"
-                    }
+                        "description": "Use force kill (default false for graceful termination)",
+                    },
                 },
-                "required": []
-            }
-        }
+                "required": [],
+            },
+        },
     },
-    
     # ============ FILE OPERATIONS ============
     {
         "type": "function",
@@ -145,18 +136,12 @@ SYSTEM_TOOLS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Full path to the file"
-                    },
-                    "encoding": {
-                        "type": "string",
-                        "description": "File encoding (default utf-8)"
-                    }
+                    "path": {"type": "string", "description": "Full path to the file"},
+                    "encoding": {"type": "string", "description": "File encoding (default utf-8)"},
                 },
-                "required": ["path"]
-            }
-        }
+                "required": ["path"],
+            },
+        },
     },
     {
         "type": "function",
@@ -166,22 +151,16 @@ SYSTEM_TOOLS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Full path to the file"
-                    },
-                    "content": {
-                        "type": "string",
-                        "description": "Content to write to the file"
-                    },
+                    "path": {"type": "string", "description": "Full path to the file"},
+                    "content": {"type": "string", "description": "Content to write to the file"},
                     "create_dirs": {
                         "type": "boolean",
-                        "description": "Create parent directories if they don't exist"
-                    }
+                        "description": "Create parent directories if they don't exist",
+                    },
                 },
-                "required": ["path", "content"]
-            }
-        }
+                "required": ["path", "content"],
+            },
+        },
     },
     {
         "type": "function",
@@ -193,20 +172,20 @@ SYSTEM_TOOLS = [
                 "properties": {
                     "start_path": {
                         "type": "string",
-                        "description": "Directory to start searching from"
+                        "description": "Directory to start searching from",
                     },
                     "pattern": {
                         "type": "string",
-                        "description": "File pattern (e.g., '*.py', '*.txt', 'report*')"
+                        "description": "File pattern (e.g., '*.py', '*.txt', 'report*')",
                     },
                     "max_results": {
                         "type": "integer",
-                        "description": "Maximum number of results to return"
-                    }
+                        "description": "Maximum number of results to return",
+                    },
                 },
-                "required": ["start_path", "pattern"]
-            }
-        }
+                "required": ["start_path", "pattern"],
+            },
+        },
     },
     {
         "type": "function",
@@ -216,32 +195,24 @@ SYSTEM_TOOLS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Full path to the file to delete"
-                    },
+                    "path": {"type": "string", "description": "Full path to the file to delete"},
                     "use_recycle_bin": {
                         "type": "boolean",
-                        "description": "Move to recycle bin instead of permanent delete (safer)"
-                    }
+                        "description": "Move to recycle bin instead of permanent delete (safer)",
+                    },
                 },
-                "required": ["path"]
-            }
-        }
+                "required": ["path"],
+            },
+        },
     },
-    
     # ============ SYSTEM INFO ============
     {
         "type": "function",
         "function": {
             "name": "get_system_stats",
             "description": "Get current system statistics (CPU, memory, disk usage). Use when user asks about system performance or resource usage.",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
     },
     {
         "type": "function",
@@ -251,26 +222,19 @@ SYSTEM_TOOLS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "interval": {
-                        "type": "number",
-                        "description": "Measurement interval in seconds"
-                    }
+                    "interval": {"type": "number", "description": "Measurement interval in seconds"}
                 },
-                "required": []
-            }
-        }
+                "required": [],
+            },
+        },
     },
     {
         "type": "function",
         "function": {
             "name": "get_memory_info",
             "description": "Get detailed memory and swap usage information.",
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
+            "parameters": {"type": "object", "properties": {}, "required": []},
+        },
     },
     {
         "type": "function",
@@ -282,14 +246,13 @@ SYSTEM_TOOLS = [
                 "properties": {
                     "path": {
                         "type": "string",
-                        "description": "Path to check disk usage (e.g., 'C:\\')"
+                        "description": "Path to check disk usage (e.g., 'C:\\')",
                     }
                 },
-                "required": []
-            }
-        }
+                "required": [],
+            },
+        },
     },
-    
     # ============ DESKTOP AUTOMATION ============
     {
         "type": "function",
@@ -299,18 +262,15 @@ SYSTEM_TOOLS = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "text": {
-                        "type": "string",
-                        "description": "Text to type"
-                    },
+                    "text": {"type": "string", "description": "Text to type"},
                     "interval": {
                         "type": "number",
-                        "description": "Delay between keystrokes in seconds"
-                    }
+                        "description": "Delay between keystrokes in seconds",
+                    },
                 },
-                "required": ["text"]
-            }
-        }
+                "required": ["text"],
+            },
+        },
     },
     {
         "type": "function",
@@ -323,35 +283,40 @@ SYSTEM_TOOLS = [
                     "keys": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "description": "Key or keys to press (e.g., ['ctrl', 'c'] for copy)"
+                        "description": "Key or keys to press (e.g., ['ctrl', 'c'] for copy)",
                     }
                 },
-                "required": ["keys"]
-            }
-        }
+                "required": ["keys"],
+            },
+        },
     },
 ]
 
 
-def get_tools_by_category(category: Optional[SystemToolCategory] = None) -> List[Dict[str, Any]]:
+def get_tools_by_category(category: SystemToolCategory | None = None) -> list[dict[str, Any]]:
     """Get tools filtered by category or all tools"""
     if category is None:
         return SYSTEM_TOOLS
-    
+
     # Filter by category (based on function name prefix)
     category_prefixes = {
         SystemToolCategory.FILE: ["read_file", "write_file", "search_files", "delete_file"],
         SystemToolCategory.PROCESS: ["start_process", "list_processes", "kill_process"],
         SystemToolCategory.DESKTOP: ["type_text", "press_key"],
-        SystemCategory.SYSTEM_INFO: ["get_system_stats", "get_cpu_info", "get_memory_info", "get_disk_info"],
+        SystemToolCategory.SYSTEM_INFO: [
+            "get_system_stats",
+            "get_cpu_info",
+            "get_memory_info",
+            "get_disk_info",
+        ],
         SystemToolCategory.WEB: ["open_url", "search_web"],
     }
-    
+
     prefixes = category_prefixes.get(category, [])
     return [tool for tool in SYSTEM_TOOLS if tool["function"]["name"] in prefixes]
 
 
-def get_tool_by_name(name: str) -> Optional[Dict[str, Any]]:
+def get_tool_by_name(name: str) -> dict[str, Any] | None:
     """Get a specific tool by its function name"""
     for tool in SYSTEM_TOOLS:
         if tool["function"]["name"] == name:

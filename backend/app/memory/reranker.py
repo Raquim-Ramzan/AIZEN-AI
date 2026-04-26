@@ -15,16 +15,18 @@ For production at scale, swap this for a dedicated reranking API
 """
 
 import logging
-from typing import List, Dict, Any, Optional
-import numpy as np
+from typing import Any
+
 import google.generativeai as genai
+import numpy as np
+
 from app.config import get_settings
 from app.core.cache import get_llm_response_cache
 
 logger = logging.getLogger(__name__)
 
 
-def _cosine_similarity(a: List[float], b: List[float]) -> float:
+def _cosine_similarity(a: list[float], b: list[float]) -> float:
     """Compute cosine similarity between two vectors."""
     a_arr = np.array(a, dtype=np.float32)
     b_arr = np.array(b, dtype=np.float32)
@@ -58,10 +60,10 @@ class Reranker:
     async def rerank(
         self,
         query: str,
-        documents: List[Dict[str, Any]],
+        documents: list[dict[str, Any]],
         top_k: int = 5,
         min_score: float = 0.3,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Rerank documents based on embedding similarity to query.
 
@@ -91,10 +93,7 @@ class Reranker:
             query_embedding = query_result["embedding"]
 
             # Batch-embed all documents in a single API call
-            doc_texts = [
-                doc.get("content", doc.get("text", str(doc)))[:1000]
-                for doc in documents
-            ]
+            doc_texts = [doc.get("content", doc.get("text", str(doc)))[:1000] for doc in documents]
             doc_result = genai.embed_content(
                 model=f"models/{self.model_name}",
                 content=doc_texts,
@@ -107,20 +106,14 @@ class Reranker:
 
             # Score each document by cosine similarity
             for i, doc in enumerate(documents):
-                doc["rerank_score"] = _cosine_similarity(
-                    query_embedding, doc_embeddings[i]
-                )
+                doc["rerank_score"] = _cosine_similarity(query_embedding, doc_embeddings[i])
 
             # Sort by rerank score descending
             documents.sort(key=lambda x: x.get("rerank_score", 0), reverse=True)
 
             # Filter by minimum score and return top_k
-            filtered = [
-                d for d in documents if d.get("rerank_score", 0) >= min_score
-            ]
-            logger.debug(
-                f"Reranked {len(documents)} documents → {len(filtered)} above threshold"
-            )
+            filtered = [d for d in documents if d.get("rerank_score", 0) >= min_score]
+            logger.debug(f"Reranked {len(documents)} documents → {len(filtered)} above threshold")
             return filtered[:top_k]
 
         except Exception as e:
@@ -154,9 +147,7 @@ class Reranker:
                 content=document[:1000],
                 task_type="retrieval_document",
             )
-            score = _cosine_similarity(
-                query_result["embedding"], doc_result["embedding"]
-            )
+            score = _cosine_similarity(query_result["embedding"], doc_result["embedding"])
             # Normalize: cosine sim is [-1, 1], clamp to [0, 1]
             score = max(0.0, min(1.0, score))
 
@@ -169,7 +160,7 @@ class Reranker:
 
 
 # Singleton
-_reranker: Optional[Reranker] = None
+_reranker: Reranker | None = None
 
 
 def get_reranker() -> Reranker:

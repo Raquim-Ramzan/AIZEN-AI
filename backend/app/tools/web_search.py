@@ -1,13 +1,16 @@
 import logging
-from typing import Dict, Any, List
+from typing import Any
+
 import aiohttp
+
 from app.tools.base import BaseTool
 
 logger = logging.getLogger(__name__)
 
+
 class WebSearchTool(BaseTool):
     """Web search using DuckDuckGo and Wikipedia"""
-    
+
     def __init__(self):
         super().__init__()
         self.name = "web_search"
@@ -15,25 +18,24 @@ class WebSearchTool(BaseTool):
         self.parameters = {
             "type": "object",
             "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "Search query"
-                },
+                "query": {"type": "string", "description": "Search query"},
                 "source": {
                     "type": "string",
                     "enum": ["duckduckgo", "wikipedia"],
-                    "description": "Search source"
+                    "description": "Search source",
                 },
                 "max_results": {
                     "type": "integer",
                     "description": "Maximum number of results",
-                    "default": 5
-                }
+                    "default": 5,
+                },
             },
-            "required": ["query"]
+            "required": ["query"],
         }
-    
-    async def execute(self, query: str, source: str = "duckduckgo", max_results: int = 5) -> Dict[str, Any]:
+
+    async def execute(
+        self, query: str, source: str = "duckduckgo", max_results: int = 5
+    ) -> dict[str, Any]:
         """Execute web search"""
         try:
             if source == "wikipedia":
@@ -43,51 +45,50 @@ class WebSearchTool(BaseTool):
         except Exception as e:
             logger.error(f"Web search error: {e}")
             return {"error": str(e), "results": []}
-    
-    async def _search_duckduckgo(self, query: str, max_results: int) -> Dict[str, Any]:
+
+    async def _search_duckduckgo(self, query: str, max_results: int) -> dict[str, Any]:
         """Search using DuckDuckGo Instant Answer API"""
         try:
             async with aiohttp.ClientSession() as session:
                 url = "https://api.duckduckgo.com/"
-                params = {
-                    "q": query,
-                    "format": "json",
-                    "no_html": 1,
-                    "skip_disambig": 1
-                }
-                
+                params = {"q": query, "format": "json", "no_html": 1, "skip_disambig": 1}
+
                 async with session.get(url, params=params) as resp:
                     data = await resp.json()
-                    
+
                     results = []
-                    
+
                     # Abstract
                     if data.get("Abstract"):
-                        results.append({
-                            "title": data.get("Heading", "Result"),
-                            "snippet": data.get("Abstract"),
-                            "url": data.get("AbstractURL", "")
-                        })
-                    
+                        results.append(
+                            {
+                                "title": data.get("Heading", "Result"),
+                                "snippet": data.get("Abstract"),
+                                "url": data.get("AbstractURL", ""),
+                            }
+                        )
+
                     # Related topics
                     for topic in data.get("RelatedTopics", [])[:max_results]:
                         if "Text" in topic:
-                            results.append({
-                                "title": topic.get("Text", "")[:50],
-                                "snippet": topic.get("Text", ""),
-                                "url": topic.get("FirstURL", "")
-                            })
-                    
+                            results.append(
+                                {
+                                    "title": topic.get("Text", "")[:50],
+                                    "snippet": topic.get("Text", ""),
+                                    "url": topic.get("FirstURL", ""),
+                                }
+                            )
+
                     return {
                         "query": query,
                         "source": "duckduckgo",
-                        "results": results[:max_results]
+                        "results": results[:max_results],
                     }
         except Exception as e:
             logger.error(f"DuckDuckGo search error: {e}")
             return {"error": str(e), "results": []}
-    
-    async def _search_wikipedia(self, query: str) -> Dict[str, Any]:
+
+    async def _search_wikipedia(self, query: str) -> dict[str, Any]:
         """Search Wikipedia"""
         try:
             async with aiohttp.ClientSession() as session:
@@ -98,27 +99,25 @@ class WebSearchTool(BaseTool):
                     "prop": "extracts",
                     "exintro": True,
                     "explaintext": True,
-                    "titles": query
+                    "titles": query,
                 }
-                
+
                 async with session.get(url, params=params) as resp:
                     data = await resp.json()
                     pages = data.get("query", {}).get("pages", {})
-                    
+
                     results = []
                     for page_id, page in pages.items():
                         if page_id != "-1":
-                            results.append({
-                                "title": page.get("title", ""),
-                                "snippet": page.get("extract", "")[:500],
-                                "url": f"https://en.wikipedia.org/wiki/{page.get('title', '').replace(' ', '_')}"
-                            })
-                    
-                    return {
-                        "query": query,
-                        "source": "wikipedia",
-                        "results": results
-                    }
+                            results.append(
+                                {
+                                    "title": page.get("title", ""),
+                                    "snippet": page.get("extract", "")[:500],
+                                    "url": f"https://en.wikipedia.org/wiki/{page.get('title', '').replace(' ', '_')}",
+                                }
+                            )
+
+                    return {"query": query, "source": "wikipedia", "results": results}
         except Exception as e:
             logger.error(f"Wikipedia search error: {e}")
             return {"error": str(e), "results": []}

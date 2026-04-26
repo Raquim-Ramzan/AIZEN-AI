@@ -6,7 +6,6 @@ Falls back to API Key if Supabase is disabled.
 """
 
 import logging
-from typing import Optional
 
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import APIKeyHeader
@@ -23,8 +22,8 @@ _api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 
 
 async def _extract_bearer(
-    raw: Optional[str] = Security(_api_key_header),
-) -> Optional[str]:
+    raw: str | None = Security(_api_key_header),
+) -> str | None:
     """Strip the 'Bearer ' prefix if present."""
     if raw is None:
         return None
@@ -37,7 +36,7 @@ async def _extract_bearer(
 # Public dependency — returns authenticated user-id (or raises 401)
 # ---------------------------------------------------------------------------
 async def require_api_key(
-    token: Optional[str] = Depends(_extract_bearer),
+    token: str | None = Depends(_extract_bearer),
 ) -> str:
     """
     Validate the Supabase JWT token or AIZEN API key.
@@ -48,7 +47,7 @@ async def require_api_key(
     settings = get_settings()
     server_key = getattr(settings, "aizen_api_key", "")
     client = get_supabase_client()
-    
+
     # Supabase Verification
     if client:
         if token:
@@ -57,8 +56,8 @@ async def require_api_key(
                 if user and user.user:
                     return user.user.id
             except Exception:
-                pass # Try other methods
-            
+                pass  # Try other methods
+
     # Fallback to Server API Key
     if server_key and token == server_key:
         return "admin_user"
