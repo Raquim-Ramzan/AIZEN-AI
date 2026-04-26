@@ -27,6 +27,12 @@ respx
 
 # Utilities
 aiofiles
+aiohttp
+chardet
+psutil
+pytz
+requests
+python-dateutil
 python-multipart
 Pillow
 pyjwt
