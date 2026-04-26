@@ -27,10 +27,18 @@ filterwarnings = [
 # Target version for Python
 target-version = "py311"
 line-length = 100
+exclude = [
+    "venv",
+    ".venv",
+    "__pycache__",
+    "data",
+    "voice_previews",
+    "pip_install_log.txt",
+]
 
 [tool.ruff.lint]
-# Enable Pyflakes (F), Pycodestyle (E, W), Isort (I)
-select = ["F", "E", "W", "I", "N", "UP", "B"]
+# Enable Pyflakes (F), Pycodestyle (E, W), Isort (I), etc.
+select = ["F", "E", "W", "I", "N", "UP", "B", "FIX", "ERA"]
 ignore = ["E501"] # Line too long (handled by formatter)
 
 [tool.ruff.format]

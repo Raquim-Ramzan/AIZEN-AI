@@ -19,7 +19,6 @@ def test_model_router_selection():
 def test_model_router_fallback(monkeypatch):
     """Verify router falls back to Ollama if Gemini key is missing"""
     router = ModelRouter()
-    
     # Simulate missing Gemini key
     monkeypatch.setattr(router.settings, "gemini_api_key", "")
     
