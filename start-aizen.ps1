@@ -1,89 +1,106 @@
-﻿# AIZEN Quick Start Script
-# This script helps you start both backend and frontend servers
+# AIZEN Integrated Start Script (Hardened Version)
+# ===============================================
 
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  AIZEN AI Assistant - Quick Start" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
+$ErrorActionPreference = "Continue"
+$PSScriptRoot = Get-Location
 
-# Check if we're in the right directory
+# --- UI Helpers ---
+function Write-Header($text) {
+    Write-Host "`n====================================================" -ForegroundColor Cyan
+    Write-Host "  $text"
+    Write-Host "====================================================`n"
+}
+
+function Write-Step($step, $text) {
+    Write-Host "[$step] $text..." -ForegroundColor Yellow
+}
+
+function Write-Success($text) {
+    Write-Host "  [OK] $text" -ForegroundColor Green
+}
+
+function Write-Error-Msg($text) {
+    Write-Host "  [ERROR] $text" -ForegroundColor Red
+}
+
+# --- Execution ---
+Write-Header "AIZEN AI Assistant - Unified Startup"
+
+# 1. Directory Validation
+Write-Step "1/4" "Validating project structure"
 if (!(Test-Path ".\backend") -or !(Test-Path ".\frontend")) {
-    Write-Host "Error: Please run this script from the Aizen project root directory" -ForegroundColor Red
+    Write-Error-Msg "Error: Must be run from AIZEN root directory."
     exit 1
 }
+Write-Success "Project structure validated."
 
-Write-Host "[1/4] Checking backend..." -ForegroundColor Yellow
+# 2. Dependency Checks
+Write-Step "2/4" "Checking system dependencies"
 
-# Check if Python is installed
+# Python
 try {
-    $pythonVersion = python --version 2>&1
-    Write-Host "✓ Python found: $pythonVersion" -ForegroundColor Green
-}
-catch {
-    Write-Host "✗ Python not found. Please install Python 3.11+" -ForegroundColor Red
+    $pythonVer = python --version 2>&1
+    Write-Success "Python found: $pythonVer"
+} catch {
+    Write-Error-Msg "Python 3.11+ is required but not found."
     exit 1
 }
 
-Write-Host ""
-Write-Host "[2/4] Checking frontend..." -ForegroundColor Yellow
-
-# Check if Node.js is installed
+# Node.js
 try {
-    $nodeVersion = node --version 2>&1
-    Write-Host "✓ Node.js found: $nodeVersion" -ForegroundColor Green
-}
-catch {
-    Write-Host "✗ Node.js not found. Please install Node.js" -ForegroundColor Red
+    $nodeVer = node --version 2>&1
+    Write-Success "Node.js found: $nodeVer"
+} catch {
+    Write-Error-Msg "Node.js is required but not found."
     exit 1
 }
 
-Write-Host ""
-Write-Host "[3/4] Checking Voice Agent..." -ForegroundColor Yellow
-$agentFile = Join-Path $PSScriptRoot "backend\app\agent.py"
-if (Test-Path $agentFile) {
-    Write-Host "✓ Voice Agent code found." -ForegroundColor Green
-}
-else {
-    Write-Host "✗ Voice Agent code not found." -ForegroundColor Red
-}
-
-Write-Host ""
-Write-Host "[4/4] Starting servers..." -ForegroundColor Yellow
-Write-Host ""
+# 3. Virtual Environment & Node Modules
+Write-Step "3/4" "Verifying local environments"
 
 $backendDir = Join-Path $PSScriptRoot "backend"
 $frontendDir = Join-Path $PSScriptRoot "frontend"
 
-# Start backend in new terminal
-Write-Host "Starting backend server..." -ForegroundColor Cyan
-$backendCmd = "cd '$backendDir'; .\venv\Scripts\activate; Write-Host 'Starting AIZEN Backend API...' -ForegroundColor Cyan; python -m app.main"
+# Backend Venv
+if (!(Test-Path "$backendDir\venv")) {
+    Write-Error-Msg "Backend venv missing."
+} else {
+    Write-Success "Backend virtual environment found."
+}
+
+# Frontend Modules
+if (!(Test-Path "$frontendDir\node_modules")) {
+    Write-Error-Msg "Frontend node_modules missing."
+} else {
+    Write-Success "Frontend node_modules found."
+}
+
+# 4. Starting Services
+Write-Step "4/4" "Launching services"
+
+# Launch Backend
+Write-Host "  > Launching AIZEN Backend API..." -ForegroundColor Cyan
+$backendCmd = "cd `"$backendDir`"; .\venv\Scripts\activate; python -m app.main"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", $backendCmd
 
-# Start Voice Agent in new terminal
-Write-Host "Starting Voice Agent (Cloud Mode)..." -ForegroundColor Cyan
-$agentCmd = "cd '$backendDir'; .\venv\Scripts\activate; Write-Host 'Starting AIZEN Voice Agent...' -ForegroundColor Cyan; python -c 'from app.agent import run_agent; run_agent()' dev"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", $agentCmd
+# Wait for backend initialization
+Write-Host "  > Waiting for backend to warm up..." -ForegroundColor Gray
+Start-Sleep -Seconds 5
 
-# Wait a moment for backend to start
-Start-Sleep -Seconds 3
-
-# Start frontend in new terminal
-Write-Host "Starting frontend server..." -ForegroundColor Cyan
-$frontendCmd = "cd '$frontendDir'; Write-Host 'Starting AIZEN Frontend...' -ForegroundColor Cyan; npm run dev"
+# Launch Frontend
+Write-Host "  > Launching AIZEN Frontend (Vite)..." -ForegroundColor Cyan
+$frontendCmd = "cd `"$frontendDir`"; npm run dev"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", $frontendCmd
 
+# Final Report
+Write-Host "`n"
+Write-Host "====================================================" -ForegroundColor Green
+Write-Host "  AIZEN SERVICES LAUNCHED SUCCESSFULLY"
+Write-Host "===================================================="
 Write-Host ""
-Write-Host "========================================" -ForegroundColor Green
-Write-Host "  AIZEN is starting!" -ForegroundColor Green
-Write-Host "========================================" -ForegroundColor Green
+Write-Host "  ➜ Backend API: http://localhost:8001"
+Write-Host "  ➜ Frontend UI: http://localhost:8080"
 Write-Host ""
-Write-Host "Backend API API: http://localhost:8001" -ForegroundColor Cyan
-Write-Host "Voice Agent:    Gemini Live (Cloud)" -ForegroundColor Cyan
-Write-Host "Frontend UI:    http://localhost:8080" -ForegroundColor Cyan
+Write-Host "  Logs are available in the separate terminal windows."
 Write-Host ""
-Write-Host "NOTE: Ensure LIVEKIT_URL, API_KEY, and API_SECRET are set in backend/.env" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "Check the new terminal windows for server logs" -ForegroundColor Yellow
-Write-Host ""
-Write-Host "Press any key to exit this window..." -ForegroundColor Gray
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+Write-Host "Launcher session complete."

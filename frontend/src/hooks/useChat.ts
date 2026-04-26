@@ -36,14 +36,99 @@ export const useChat = (conversationId?: string | null, options?: UseChatOptions
         if (conversationId && conversationId !== activeConversationId) {
             setActiveConversationId(conversationId);
         }
-    }, [conversationId]);
+    }, [conversationId, activeConversationId]);
+
+    // Load messages from backend
+    const loadMessages = useCallback(async (convId: string) => {
+        try {
+            const response = await chatService.getMessages(convId);
+
+            if (response.data) {
+                const uiMessages: UIMessage[] = response.data.map((msg) => ({
+                    id: msg.id,
+                    role: msg.role,
+                    content: msg.content,
+                    timestamp: new Date(msg.timestamp).toLocaleTimeString(),
+                    metadata: msg.metadata,
+                }));
+                setMessages(uiMessages);
+            }
+        } catch (err) {
+            console.error('[useChat] Error loading messages:', err);
+            setError('Failed to load messages');
+        }
+    }, []);
+
+    // Send message (streaming via WebSocket)
+    const sendMessage = useCallback(
+        async (content: string, metadata?: MessageMetadata) => {
+            // Add user message immediately
+            const userMessage: UIMessage = {
+                id: Date.now().toString(),
+                role: 'user',
+                content,
+                timestamp: new Date().toLocaleTimeString(),
+            };
+
+            setMessages((prev) => [...prev, userMessage]);
+            setError(null);
+            streamingMessageRef.current = '';
+
+            // Send via WebSocket for streaming response
+            // Pass the activeConversationId (may be null for first message)
+            const success = sendChatMessage(content, activeConversationId, metadata);
+
+            if (!success) {
+                setError('Failed to send message - not connected');
+            }
+
+            return success;
+        },
+        [activeConversationId, sendChatMessage]
+    );
+
+    // Clear messages
+    const clearMessages = useCallback(() => {
+        setMessages([]);
+        setCurrentStreamingMessage('');
+        streamingMessageRef.current = '';
+        setError(null);
+    }, []);
+
+    // Clear pending operation
+    const clearPendingOperation = useCallback(() => {
+        setPendingOperation(null);
+    }, []);
+
+    // Reset for new conversation
+    const resetForNewConversation = useCallback(() => {
+        setMessages([]);
+        setCurrentStreamingMessage('');
+        streamingMessageRef.current = '';
+        setError(null);
+        setActiveConversationId(null);
+    }, []);
+
+    // Create new session via WebSocket
+    const createNewSession = useCallback(() => {
+        // Clear local state
+        setMessages([]);
+        setCurrentStreamingMessage('');
+        streamingMessageRef.current = '';
+        setError(null);
+        setActiveConversationId(null);
+        // Tell backend to create new session
+        return sendNewSession();
+    }, [sendNewSession]);
+
+    // -- Lifecycle Hooks (Moved here to avoid TDZ) --
 
     // Load initial messages if conversation ID provided
     useEffect(() => {
         if (activeConversationId) {
             loadMessages(activeConversationId);
         }
-    }, [activeConversationId]);
+    }, [activeConversationId, loadMessages]);
 
     // Subscribe to streaming messages
     useEffect(() => {
@@ -131,89 +216,6 @@ export const useChat = (conversationId?: string | null, options?: UseChatOptions
             unsubSessionCreated();
         };
     }, [subscribe, activeConversationId, options]);
-
-    // Load messages from backend
-    const loadMessages = useCallback(async (convId: string) => {
-        try {
-            const response = await chatService.getMessages(convId);
-
-            if (response.data) {
-                const uiMessages: UIMessage[] = response.data.map((msg) => ({
-                    id: msg.id,
-                    role: msg.role,
-                    content: msg.content,
-                    timestamp: new Date(msg.timestamp).toLocaleTimeString(),
-                    metadata: msg.metadata,
-                }));
-                setMessages(uiMessages);
-            }
-        } catch (err) {
-            console.error('[useChat] Error loading messages:', err);
-            setError('Failed to load messages');
-        }
-    }, []);
-
-    // Send message (streaming via WebSocket)
-    const sendMessage = useCallback(
-        async (content: string, metadata?: MessageMetadata) => {
-            // Add user message immediately
-            const userMessage: UIMessage = {
-                id: Date.now().toString(),
-                role: 'user',
-                content,
-                timestamp: new Date().toLocaleTimeString(),
-            };
-
-            setMessages((prev) => [...prev, userMessage]);
-            setError(null);
-            streamingMessageRef.current = '';
-
-            // Send via WebSocket for streaming response
-            // Pass the activeConversationId (may be null for first message)
-            const success = sendChatMessage(content, activeConversationId, metadata);
-
-            if (!success) {
-                setError('Failed to send message - not connected');
-            }
-
-            return success;
-        },
-        [activeConversationId, sendChatMessage]
-    );
-
-    // Clear messages
-    const clearMessages = useCallback(() => {
-        setMessages([]);
-        setCurrentStreamingMessage('');
-        streamingMessageRef.current = '';
-        setError(null);
-    }, []);
-
-    // Clear pending operation
-    const clearPendingOperation = useCallback(() => {
-        setPendingOperation(null);
-    }, []);
-
-    // Reset for new conversation
-    const resetForNewConversation = useCallback(() => {
-        setMessages([]);
-        setCurrentStreamingMessage('');
-        streamingMessageRef.current = '';
-        setError(null);
-        setActiveConversationId(null);
-    }, []);
-
-    // Create new session via WebSocket
-    const createNewSession = useCallback(() => {
-        // Clear local state
-        setMessages([]);
-        setCurrentStreamingMessage('');
-        streamingMessageRef.current = '';
-        setError(null);
-        setActiveConversationId(null);
-        // Tell backend to create new session
-        return sendNewSession();
-    }, [sendNewSession]);
 
     return {
         messages,

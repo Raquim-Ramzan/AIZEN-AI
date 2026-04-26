@@ -19,8 +19,8 @@ class ConversationNamer:
         if settings.gemini_api_key:
             try:
                 genai.configure(api_key=settings.gemini_api_key)
-                # Use Gemini Flash for fast, cheap title generation
-                self.model = genai.GenerativeModel('gemini-2.0-flash')
+                # Use Gemini 3 Flash Preview for fast title generation (2026 standard)
+                self.model = genai.GenerativeModel('gemini-3-flash-preview')
                 logger.info("ConversationNamer initialized with Gemini Flash")
             except Exception as e:
                 logger.warning(f"Failed to initialize ConversationNamer: {e}")

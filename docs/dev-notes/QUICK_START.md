@@ -182,7 +182,7 @@ Want to change which model is used for each task? Edit `.env`:
 MODEL_CODING="gemini-2.5-pro"
 
 # Change the chat model  
-MODEL_CHAT="gemini-2.0-flash-exp"
+MODEL_CHAT="gemini-3-flash-exp"
 
 # Change the search model
 MODEL_SEARCH="sonar-reasoning-pro"
@@ -206,7 +206,7 @@ response = await chat({
 - `gemini-3-pro-preview` - Best for coding
 - `gemini-2.5-flash` - Fast general chat
 - `gemini-2.5-pro` - Advanced reasoning
-- `gemini-2.0-flash-exp` - Experimental fast model
+- `gemini-3-flash-exp` - Experimental fast model
 
 ### Groq Models
 - `groq/compound` - Ultra-fast streaming

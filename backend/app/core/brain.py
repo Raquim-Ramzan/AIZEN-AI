@@ -123,7 +123,8 @@ class AIBrain:
         tools: Optional[List[Dict[str, Any]]] = None,
         use_ollama: bool = False,
         provider: Optional[ModelProvider] = None,
-        image_data: Optional[Dict[str, Any]] = None  # For vision requests
+        image_data: Optional[Dict[str, Any]] = None,  # For vision requests
+        audio_data: Optional[Dict[str, Any]] = None   # For multimodal audio
     ) -> AsyncGenerator[str, None]:
         """Stream response from AI model"""
         try:
@@ -139,7 +140,7 @@ class AIBrain:
             
             # Route to appropriate provider
             if provider == ModelProvider.GEMINI and self.gemini_client:
-                async for chunk in self._gemini_stream(messages, model, temperature, max_tokens, tools, image_data):
+                async for chunk in self._gemini_stream(messages, model, temperature, max_tokens, tools, image_data, audio_data):
                     yield chunk
             elif provider == ModelProvider.GROQ and self.groq_client:
                 async for chunk in self._groq_stream(messages, model, temperature, max_tokens, tools):
@@ -253,7 +254,7 @@ class AIBrain:
             logger.error(f"Gemini generation error: {e}")
             raise
     
-    async def _gemini_stream(self, messages, model, temperature, max_tokens, tools=None, image_data=None):
+    async def _gemini_stream(self, messages, model, temperature, max_tokens, tools=None, image_data=None, audio_data=None):
         """Stream using Gemini API with optional function calling and vision"""
         try:
             import base64
@@ -289,6 +290,17 @@ class AIBrain:
                 # Last user turn text + image
                 last_text = gemini_contents[-1]["parts"][0] if gemini_contents else ""
                 content = [last_text, image_part]
+            elif audio_data:
+                # Multimodal request with audio
+                logger.info(f"Creating multimodal request with audio: {audio_data.get('name', 'audio.wav')}")
+                audio_bytes = base64.b64decode(audio_data["data"])
+                audio_part = {
+                    "mime_type": audio_data.get("type", "audio/wav"),
+                    "data": audio_bytes,
+                }
+                # Last user turn text + audio
+                last_text = gemini_contents[-1]["parts"][0] if gemini_contents else ""
+                content = [last_text, audio_part]
             else:
                 # Text-only request — pass native Content list
                 content = gemini_contents

@@ -51,35 +51,28 @@ async def require_api_key(
     
     # Supabase Verification
     if client:
-        if not token:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Missing Authorization header. Send 'Authorization: Bearer <JWT>'.",
-            )
-        try:
-            user = client.auth.get_user(token)
-            if user and user.user:
-                return user.user.id
-        except Exception as e:
-            # If Supabase fails, try fallback API key below
-            pass
+        if token:
+            try:
+                user = client.auth.get_user(token)
+                if user and user.user:
+                    return user.user.id
+            except Exception:
+                pass # Try other methods
             
     # Fallback to Server API Key
-    if not server_key and not client:
-        logger.warning(
-            "Authentication is DISABLED. "
-            "Set SUPABASE_URL/KEY or AIZEN_API_KEY in .env."
-        )
-        return "anonymous"
+    if server_key and token == server_key:
+        return "admin_user"
+
+    # LOCAL DEV BYPASS: If no token and in dev mode, allow access
+    if settings.env != "production":
+        logger.info("Local Development: Allowing anonymous access")
+        return "dev-user"
 
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing Authorization header.",
         )
-
-    if server_key and token == server_key:
-        return "admin_user" # Special user id for API Key bypass
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

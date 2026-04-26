@@ -127,7 +127,7 @@ python -c "from app.agent import run_agent; run_agent()"
 As of December 25, 2025, the Gemini Realtime API is in **limited preview**:
 
 1. **Access Required:** You may need to request early access
-2. **Model Name:** `gemini-2.4-flash-live` may be updated to `gemini-2.0-flash-live` or similar
+2. **Model Name:** `gemini-2.4-flash-live` may be updated to `gemini-3-flash-live` or similar
 3. **Voice Selection:** Charon voice availability depends on Google's voice catalog
 
 ### Workarounds if Realtime Not Available
@@ -238,7 +238,7 @@ python -c "import os; print(os.getenv('GEMINI_API_KEY')[:10])"
 
 1. **Verify Gemini Realtime Access:**
    - Check Google AI Studio for API access
-   - Confirm model name (`gemini-2.4-flash-live` vs `gemini-2.0-flash-exp`)
+   - Confirm model name (`gemini-2.4-flash-live` vs `gemini-3-flash-exp`)
 
 2. **Test Voice Quality:**
    - Charon voice may need to be requested separately

@@ -81,99 +81,6 @@ const Index = () => {
         return saved ? JSON.parse(saved) : false;
     });
 
-    // Extract artifacts from messages
-    useEffect(() => {
-        const newArtifacts: Artifact[] = [];
-
-        messages.forEach(msg => {
-            if (msg.role === 'assistant') {
-                // Regex to find code blocks: ```language code ```
-                const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
-                let match;
-                let index = 0;
-
-                while ((match = codeBlockRegex.exec(msg.content)) !== null) {
-                    const language = match[1] || 'text';
-                    const code = match[2];
-                    const title = `${language} snippet ${index + 1}`;
-                    const id = `art-${msg.id}-${index}`;
-
-                    newArtifacts.push({
-                        id,
-                        title,
-                        type: 'code',
-                        content: code,
-                        language,
-                        timestamp: Date.now() // In real app, use msg timestamp
-                    });
-                    index++;
-                }
-            }
-        });
-
-        // Only update if count changed to avoid loops (simple check)
-        if (newArtifacts.length !== artifacts.length) {
-            setArtifacts(newArtifacts);
-            // Notify if new artifact found during streaming
-            if (isStreaming && newArtifacts.length > artifacts.length) {
-                toast.success("New artifact created", {
-                    description: "Code snippet saved to Artifacts panel",
-                    action: {
-                        label: "View",
-                        onClick: () => setArtifactsOpen(true)
-                    }
-                });
-            }
-        }
-    }, [messages, isStreaming, artifacts.length]);
-
-    // Update sphere state based on streaming status
-    useEffect(() => {
-        if (isStreaming) {
-            setSphereState("speaking");
-        } else if (!isStreaming && sphereState === "speaking") {
-            setSphereState("idle");
-        }
-    }, [isStreaming, sphereState]);
-
-    // Show chat errors
-    useEffect(() => {
-        if (chatError) {
-            toast.error("Chat Error", {
-                description: chatError,
-            });
-        }
-    }, [chatError]);
-
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // Alt + PgUp - Activate voice
-            if (e.altKey && e.key === "PageUp") {
-                e.preventDefault();
-                handleSphereActivate();
-            }
-
-            // F11 - Fullscreen
-            if (e.key === "F11") {
-                e.preventDefault();
-                toggleFullscreen();
-            }
-
-            // ESC - Exit fullscreen or stop listening
-            if (e.key === "Escape") {
-                if (isFullscreen) {
-                    exitFullscreen();
-                } else if (sphereState === "listening") {
-                    setSphereState("idle");
-                }
-            }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [sphereState, isFullscreen]);
-
     // Voice service integration (Phase 3: Event-Driven)
     const {
         voiceState,
@@ -194,50 +101,7 @@ const Index = () => {
         }
     });
 
-    // Auto-speak effect: speaks AI responses when enabled
     const prevStreamingRef = useRef(false);
-    useEffect(() => {
-        if (isStreaming) {
-            prevStreamingRef.current = true;
-        } else if (!isStreaming && prevStreamingRef.current) {
-            // Streaming just completed
-            prevStreamingRef.current = false;
-
-            console.log('[Index] Streaming completed, autoSpeak:', autoSpeak, 'messages:', messages.length);
-
-            // Auto-speak the last assistant message if enabled
-            if (autoSpeak && messages.length > 0) {
-                const lastMessage = messages[messages.length - 1];
-                if (lastMessage.role === 'assistant' && lastMessage.content) {
-                    // Extract text content (remove code blocks for cleaner speech)
-                    const textToSpeak = lastMessage.content
-                        .replace(/```[\s\S]*?```/g, ' ')
-                        .replace(/`[^`]+`/g, (match) => match.slice(1, -1))
-                        .replace(/\*\*([^*]+)\*\*/g, '$1')  // Remove bold markdown
-                        .replace(/\*([^*]+)\*/g, '$1')      // Remove italic markdown
-                        .replace(/#{1,6}\s+/g, '')          // Remove headings
-                        .replace(/\n+/g, '. ')              // Convert newlines to pauses
-                        .trim();
-
-                    if (textToSpeak.length > 0 && textToSpeak.length < 3000) {
-                        console.log('[Index] Auto-speaking response:', textToSpeak.substring(0, 100) + '...');
-
-                        // Try to speak using the voice service
-                        speak(textToSpeak).catch((error) => {
-                            console.error('[Index] Auto-speak failed:', error);
-                            // Fallback to browser's native Speech Synthesis
-                            if ('speechSynthesis' in window) {
-                                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                                utterance.rate = 1.0;
-                                utterance.pitch = 1.0;
-                                window.speechSynthesis.speak(utterance);
-                            }
-                        });
-                    }
-                }
-            }
-        }
-    }, [isStreaming, messages, autoSpeak, speak]);
 
     const handleSphereActivate = useCallback(async () => {
         if (sphereState === "idle") {
@@ -474,6 +338,145 @@ const Index = () => {
         }
     };
 
+    // -- Lifecycle Hooks (Moved here to avoid TDZ) --
+
+    // Extract artifacts from messages
+    useEffect(() => {
+        const newArtifacts: Artifact[] = [];
+
+        messages.forEach(msg => {
+            if (msg.role === 'assistant') {
+                // Regex to find code blocks: ```language code ```
+                const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+                let match;
+                let index = 0;
+
+                while ((match = codeBlockRegex.exec(msg.content)) !== null) {
+                    const language = match[1] || 'text';
+                    const code = match[2];
+                    const title = `${language} snippet ${index + 1}`;
+                    const id = `art-${msg.id}-${index}`;
+
+                    newArtifacts.push({
+                        id,
+                        title,
+                        type: 'code',
+                        content: code,
+                        language,
+                        timestamp: Date.now() // In real app, use msg timestamp
+                    });
+                    index++;
+                }
+            }
+        });
+
+        // Only update if count changed to avoid loops (simple check)
+        if (newArtifacts.length !== artifacts.length) {
+            setArtifacts(newArtifacts);
+            // Notify if new artifact found during streaming
+            if (isStreaming && newArtifacts.length > artifacts.length) {
+                toast.success("New artifact created", {
+                    description: "Code snippet saved to Artifacts panel",
+                    action: {
+                        label: "View",
+                        onClick: () => setArtifactsOpen(true)
+                    }
+                });
+            }
+        }
+    }, [messages, isStreaming, artifacts.length]);
+
+    // Update sphere state based on streaming status
+    useEffect(() => {
+        if (isStreaming) {
+            setSphereState("speaking");
+        } else if (!isStreaming && sphereState === "speaking") {
+            setSphereState("idle");
+        }
+    }, [isStreaming, sphereState]);
+
+    // Show chat errors
+    useEffect(() => {
+        if (chatError) {
+            toast.error("Chat Error", {
+                description: chatError,
+            });
+        }
+    }, [chatError]);
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Alt + PgUp - Activate voice
+            if (e.altKey && e.key === "PageUp") {
+                e.preventDefault();
+                handleSphereActivate();
+            }
+
+            // F11 - Fullscreen
+            if (e.key === "F11") {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+
+            // ESC - Exit fullscreen or stop listening
+            if (e.key === "Escape") {
+                if (isFullscreen) {
+                    exitFullscreen();
+                } else if (sphereState === "listening") {
+                    setSphereState("idle");
+                }
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [sphereState, isFullscreen, handleSphereActivate, toggleFullscreen, exitFullscreen]);
+
+    // Auto-speak effect: speaks AI responses when enabled
+    useEffect(() => {
+        if (isStreaming) {
+            prevStreamingRef.current = true;
+        } else if (!isStreaming && prevStreamingRef.current) {
+            // Streaming just completed
+            prevStreamingRef.current = false;
+
+            console.log('[Index] Streaming completed, autoSpeak:', autoSpeak, 'messages:', messages.length);
+
+            // Auto-speak the last assistant message if enabled
+            if (autoSpeak && messages.length > 0) {
+                const lastMessage = messages[messages.length - 1];
+                if (lastMessage.role === 'assistant' && lastMessage.content) {
+                    // Extract text content (remove code blocks for cleaner speech)
+                    const textToSpeak = lastMessage.content
+                        .replace(/```[\s\S]*?```/g, ' ')
+                        .replace(/`[^`]+`/g, (match) => match.slice(1, -1))
+                        .replace(/\*\*([^*]+)\*\*/g, '$1')  // Remove bold markdown
+                        .replace(/\*([^*]+)\*/g, '$1')      // Remove italic markdown
+                        .replace(/#{1,6}\s+/g, '')          // Remove headings
+                        .replace(/\n+/g, '. ')              // Convert newlines to pauses
+                        .trim();
+
+                    if (textToSpeak.length > 0 && textToSpeak.length < 3000) {
+                        console.log('[Index] Auto-speaking response:', textToSpeak.substring(0, 100) + '...');
+
+                        // Try to speak using the voice service
+                        speak(textToSpeak).catch((error) => {
+                            console.error('[Index] Auto-speak failed:', error);
+                            // Fallback to browser's native Speech Synthesis
+                            if ('speechSynthesis' in window) {
+                                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                                utterance.rate = 1.0;
+                                utterance.pitch = 1.0;
+                                window.speechSynthesis.speak(utterance);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }, [isStreaming, messages, autoSpeak, speak]);
+
     // Show offline fallback if backend is not connected
     if (connectionState === "error" || connectionState === "disconnected") {
         return (
@@ -562,6 +565,8 @@ const Index = () => {
                         onSend={handleSendMessage}
                         onScreenCapture={handleScreenCapture}
                         onFileAttach={handleFileAttach}
+                        onVoiceToggle={handleSphereActivate}
+                        isListening={sphereState === "listening"}
                     />
                 </div>
 

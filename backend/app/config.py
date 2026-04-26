@@ -29,16 +29,16 @@ class Settings(BaseSettings):
 
     # --- Ollama Configuration (local fallback) ---------------------------
     ollama_host: str = "http://localhost:11434"
-    ollama_model: str = "llama3.1:8b"
+    ollama_model: str = "llama3.2:3b-instruct-q6_K"
 
     # --- Model Preferences for Different Task Types ----------------------
-    model_coding: str = "gemini-3-flash-preview"
+    model_coding: str = "gemini-3.1-pro-preview"
     model_chat: str = "gemini-3-flash-preview"
     model_reasoning: str = "gemini-3-flash-preview"
     model_search: str = "sonar-pro"
     model_research: str = "sonar-deep-research"
-    model_image: str = "imagen-4-ultra"
-    model_embedding: str = "text-embedding-004"
+    model_image: str = "gemini-3.1-flash-image-preview"
+    model_embedding: str = "BAAI/bge-small-en-v1.5"
     model_fast_streaming: str = "groq-compound"
 
     # --- Memory Configuration -------------------------------------------

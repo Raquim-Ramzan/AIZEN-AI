@@ -66,7 +66,7 @@ else:
 - `gemini-3-pro-preview` - Coding & reasoning
 - `gemini-2.5-flash` - Fast chat
 - `gemini-2.5-pro` - Advanced reasoning
-- `gemini-2.0-flash-exp` - Experimental
+- `gemini-3-flash-exp` - Experimental
 - `text-embedding-004` - Embeddings
 - `imagen-4-ultra` - Image generation
 

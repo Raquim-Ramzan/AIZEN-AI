@@ -252,11 +252,11 @@ class RAGManager:
                     try:
                         await self.core_memory.add_learned_knowledge(user_id, fact_text, "normal", "conversation")
                         result["facts_extracted"] += 1
-                except Exception as fallback_err:
-                    logger.error(
-                        f"Fallback fact storage also failed for fact "
-                        f"'{fact_text[:50]}...': {fallback_err}"
-                    )
+                    except Exception as fallback_err:
+                        logger.error(
+                            f"Fallback fact storage also failed for fact "
+                            f"'{fact_text[:50]}...': {fallback_err}"
+                        )
         
         # 3. Index the conversation exchange
         if self.vector_store:
@@ -431,26 +431,26 @@ Summary:"""
     # STATISTICS & MAINTENANCE
     # =====================================================
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self, user_id: str) -> Dict[str, Any]:
         """Get comprehensive RAG statistics"""
+        from app.config import get_settings
+        settings = get_settings()
+        
         stats = {
             "vector_store": {},
             "core_memory": {},
             "rag_config": {
-                "max_context_length": self.max_context_length,
+                "max_context_tokens": settings.rag_context_budget_tokens,
                 "auto_index_enabled": self.auto_index_enabled,
                 "auto_summarize_threshold": self.auto_summarize_threshold
             }
         }
         
         if self.vector_store:
-            stats["vector_store"] = self.vector_store.get_stats()
+            stats["vector_store"] = self.vector_store.get_stats(user_id)
         
         if self.core_memory:
             stats["core_memory"] = {
-                "core_facts_count": len(self.core_memory.memory.get("core_facts", [])),
-                "learned_knowledge_count": len(self.core_memory.memory.get("learned_knowledge", [])),
-                "summaries_count": len(self.core_memory.memory.get("conversation_summaries", {})),
                 "extraction_stats": self.core_memory.get_extraction_stats()
             }
         

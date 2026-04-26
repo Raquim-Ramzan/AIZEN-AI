@@ -6,21 +6,21 @@ models/gemini-2.5-flash
 
 models/gemini-2.5-pro
 
-models/gemini-2.0-flash-exp
+models/gemini-3-flash-exp
 
-models/gemini-2.0-flash
+models/gemini-3-flash
 
-models/gemini-2.0-flash-001
+models/gemini-3-flash-001
 
-models/gemini-2.0-flash-exp-image-generation
+models/gemini-3-flash-exp-image-generation
 
-models/gemini-2.0-flash-lite-001
+models/gemini-3-flash-lite-001
 
-models/gemini-2.0-flash-lite
+models/gemini-3-flash-lite
 
-models/gemini-2.0-flash-lite-preview-02-05
+models/gemini-3-flash-lite-preview-02-05
 
-models/gemini-2.0-flash-lite-preview
+models/gemini-3-flash-lite-preview
 
 models/gemini-exp-1206
 

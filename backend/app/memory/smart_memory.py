@@ -48,6 +48,7 @@ class SmartMemoryManager:
     
     async def add_fact_smart(
         self,
+        user_id: str,
         fact: str,
         importance: str = "normal",
         source: str = "conversation",
@@ -72,7 +73,7 @@ class SmartMemoryManager:
         }
         
         # 1. Find similar existing facts
-        similar_facts = await self._find_similar_facts(fact)
+        similar_facts = await self._find_similar_facts(user_id, fact)
         result["similar_facts"] = similar_facts
         
         if similar_facts:
@@ -85,9 +86,9 @@ class SmartMemoryManager:
                 logger.info(f"Skipping duplicate fact: {fact[:50]}...")
                 return result
             
-            elif decision["action"] == "update":
                 # Update existing fact with new information
                 updated = await self._update_existing_fact(
+                    user_id=user_id,
                     fact_id=decision["target_fact_id"],
                     new_info=fact,
                     merged_content=decision.get("merged_content")
@@ -105,6 +106,7 @@ class SmartMemoryManager:
         
         if self.core_memory:
             await self.core_memory.add_learned_knowledge(
+                user_id=user_id,
                 fact=fact_with_date["content"],
                 importance=importance,
                 source=source
@@ -112,7 +114,8 @@ class SmartMemoryManager:
         
         if self.vector_store:
             await self.vector_store.add_document(
-                fact_with_date["content"],
+                content=fact_with_date["content"],
+                user_id=user_id,
                 metadata={
                     "type": "fact",
                     "date_added": fact_with_date["date_added"],
@@ -148,35 +151,30 @@ class SmartMemoryManager:
             "metadata": metadata or {}
         }
     
-    async def _find_similar_facts(self, fact: str) -> List[Dict[str, Any]]:
-        """Find semantically similar existing facts"""
+    async def _find_similar_facts(self, user_id: str, fact: str, threshold: float = 0.8) -> List[Dict[str, Any]]:
+        """Find existing facts that are semantically similar to the new one."""
         if not self.vector_store:
             return []
-        
+            
         try:
             # Query vector store for similar documents
-            results = self.vector_store.memory_collection.query(
-                query_texts=[fact],
-                n_results=self.MAX_COMPARISON_FACTS,
-                include=["documents", "metadatas", "distances"]
+            results = await self.vector_store.search(
+                query=fact,
+                user_id=user_id,
+                limit=5,
+                relevance_threshold=threshold
             )
             
             similar = []
-            if results and results["documents"] and results["documents"][0]:
-                for i, doc in enumerate(results["documents"][0]):
-                    distance = results["distances"][0][i]
-                    # Convert distance to similarity (for cosine, smaller is more similar)
-                    similarity = 1 - distance if distance <= 1 else 1 / (1 + distance)
-                    
-                    if similarity >= self.SIMILARITY_THRESHOLD:
-                        meta = results["metadatas"][0][i] if results["metadatas"] else {}
-                        similar.append({
-                            "id": results["ids"][0][i] if results["ids"] else None,
-                            "content": doc,
-                            "similarity": similarity,
-                            "date_added": meta.get("date_added", "unknown"),
-                            "metadata": meta
-                        })
+            for res in results:
+                # results from vector_store.search already formatted
+                similar.append({
+                    "id": res["id"],
+                    "content": res["content"],
+                    "similarity": res["relevance_score"],
+                    "date_added": res.get("metadata", {}).get("date_added", "unknown"),
+                    "metadata": res.get("metadata", {})
+                })
             
             return similar
             
@@ -267,6 +265,7 @@ JSON response:"""
     
     async def _update_existing_fact(
         self,
+        user_id: str,
         fact_id: str,
         new_info: str,
         merged_content: Optional[str]
@@ -279,14 +278,17 @@ JSON response:"""
         # Update in vector store
         if self.vector_store and fact_id:
             try:
-                self.vector_store.memory_collection.update(
-                    ids=[fact_id],
-                    documents=[content],
-                    metadatas=[{
+                # Since content change requires re-embedding, we delete and re-add
+                await self.vector_store.delete_document(fact_id, user_id)
+                await self.vector_store.add_document(
+                    content=content,
+                    user_id=user_id,
+                    metadata={
                         "type": "fact",
                         "date_updated": now.isoformat(),
-                        "source": "llm_merge"
-                    }]
+                        "source": "llm_merge",
+                        "original_id": fact_id
+                    }
                 )
             except Exception as e:
                 logger.error(f"Failed to update fact in vector store: {e}")
@@ -355,13 +357,16 @@ JSON:"""
             logger.warning(f"Clustering failed: {e}")
             return {"uncategorized": facts}
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self, user_id: Optional[str] = None) -> Dict[str, Any]:
         """Get memory manager statistics"""
-        return {
+        stats = {
             "initialized": self._initialized,
             "similarity_threshold": self.SIMILARITY_THRESHOLD,
             "max_comparison_facts": self.MAX_COMPARISON_FACTS
         }
+        if user_id and self.vector_store:
+            stats["vector_store"] = self.vector_store.get_stats(user_id)
+        return stats
 
 
 # Singleton

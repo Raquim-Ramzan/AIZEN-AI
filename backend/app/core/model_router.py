@@ -145,10 +145,9 @@ class ModelRouter:
             "gemini": {
                 "available": self._is_provider_available(ModelProvider.GEMINI),
                 "models": [
-                    {"name": "gemini-3-flash-preview", "description": "Latest fast model for chat and coding"},
-                    {"name": "gemini-3-pro-preview", "description": "Advanced reasoning and analysis"},
-                    {"name": "gemini-2.5-flash", "description": "Fast, cost-effective for general chat"},
-                    {"name": "gemini-2.5-pro", "description": "High-intelligence model (legacy)"},
+                    {"name": "gemini-3-flash", "description": "2026 standard for high-volume chat and coding"},
+                    {"name": "gemini-3.1-pro", "description": "The peak of reasoning and agentic workflows"},
+                    {"name": "gemini-3-pro-preview", "description": "Advanced reasoning (legacy preview)"},
                 ]
             },
             "groq": {
@@ -192,11 +191,8 @@ class ModelRouter:
         """Map user-friendly model names to Gemini API model names"""
         model_mapping = {
             "gemini-3-flash-preview": "models/gemini-3-flash-preview",
+            "gemini-3.1-pro-preview": "models/gemini-3.1-pro-preview",
             "gemini-3-pro-preview": "models/gemini-3-pro-preview",
-            "gemini-2.5-flash": "models/gemini-2.5-flash",
-            "gemini-2.5-pro": "models/gemini-2.5-pro", 
-            "gemini-2.0-flash-exp": "models/gemini-2.0-flash-exp",
-            "gemini-2.0-flash": "models/gemini-2.0-flash",
             "text-embedding-004": "models/text-embedding-004",
             "imagen-4-ultra": "models/imagen-4-ultra",
         }

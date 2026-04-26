@@ -136,7 +136,8 @@ export class LiveKitVoiceService {
                         document.body.appendChild(audioElement);
 
                         // Fix for event name mismatch
-                        (track as any).on('unsubscribed', () => {
+                        // @ts-ignore - 'unsubscribed' event exists on Track but might not be in the type definition used
+                        track.on('unsubscribed', () => {
                             audioElement.remove();
                         });
                     }

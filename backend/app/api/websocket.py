@@ -188,6 +188,7 @@ async def handle_message(client_id: str, message_data: Dict[str, Any], websocket
         # ===== FILE ATTACHMENT HANDLING =====
         attached_file = metadata.get("attached_file")
         image_data = None
+        audio_data = None
         
         if attached_file:
             file_name = attached_file.get("name", "unknown")
@@ -209,6 +210,21 @@ async def handle_message(client_id: str, message_data: Dict[str, Any], websocket
                 await manager.send_message(client_id, {
                     "type": "status",
                     "message": f"Analyzing image: {file_name}",
+                    "conversation_id": conversation_id
+                })
+            
+            # Check if it's an audio file for multimodal audio processing
+            elif file_type.startswith("audio/") and file_data:
+                audio_data = {
+                    "name": file_name,
+                    "type": file_type,
+                    "data": file_data
+                }
+                logger.info(f"Audio detected - will use Gemini Multimodal Audio")
+                
+                await manager.send_message(client_id, {
+                    "type": "status",
+                    "message": f"Processing audio: {file_name}",
                     "conversation_id": conversation_id
                 })
         
@@ -314,12 +330,15 @@ For example:
                 "tools": [tool["function"]["name"] for tool in SYSTEM_TOOLS]
             })
         
-        # If we have an image, force Gemini provider (it has vision capabilities)
-        if image_data:
+        # If we have an image or audio, force Gemini provider (multimodal)
+        if image_data or audio_data:
             provider = ModelProvider.GEMINI
-            model = "gemini-2.5-flash"  # Use flash for vision - it's fast and supports images
-            tools_to_use = None  # No tools when doing vision
-            logger.info(f"Forcing Gemini provider for image analysis")
+            model = "gemini-2.5-flash"  # Use flash for multimodal - fast and supports images/audio
+            tools_to_use = None  # No tools when doing multimodal for now
+            if audio_data:
+                logger.info(f"Forcing Gemini provider for audio analysis")
+            else:
+                logger.info(f"Forcing Gemini provider for image analysis")
         
         # Stream response
         full_response = ""
@@ -342,7 +361,8 @@ For example:
                 provider=provider,
                 model=model,
                 tools=tools_to_use,
-                image_data=image_data  # Pass image data for vision
+                image_data=image_data,  # Pass image data
+                audio_data=audio_data   # Pass audio data
             ):
                 # Check if chunk contains tool calls
                 if isinstance(chunk, dict) and "tool_calls" in chunk:

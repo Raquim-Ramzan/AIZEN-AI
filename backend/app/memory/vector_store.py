@@ -23,43 +23,99 @@ RELEVANCE_THRESHOLD_LOOSE = 1.0   # Somewhat relevant
 
 
 class VectorStore:
-    """Supabase vector store with FastEmbed for local embeddings"""
+    """Supabase vector store with support for Local (FastEmbed) or Cloud (Google) embeddings"""
     
     def __init__(self):
         self.client = None
         self.embedding_model = None
-        self.model_name = "BAAI/bge-small-en-v1.5"
+        self.provider = "local"  # "local" or "google"
+        self.model_name = ""
+        self.dimensions = 384    # Default for bge-small
     
     async def initialize(self):
-        """Initialize Supabase client and FastEmbed model"""
+        """Initialize Supabase client and embedding provider"""
+        settings = get_settings()
+        self.model_name = settings.model_embedding or "BAAI/bge-small-en-v1.5"
+        self.dimensions = 384  # Fixed for our Supabase schema
+        
         try:
             self.client = get_supabase_client()
             if not self.client:
                 logger.error("Supabase client not initialized. Vector store will be disabled.")
                 return
 
-            # Initialize local embedding model
-            # BAAI/bge-small-en-v1.5 is highly accurate and outputs 384 dimensions
-            logger.info(f"Loading local embedding model: {self.model_name}")
-            self.embedding_model = TextEmbedding(model_name=self.model_name)
-            logger.info("Vector store initialized with FastEmbed and Supabase")
+            # Determine provider
+            if "text-embedding" in self.model_name.lower():
+                self.provider = "google"
+                logger.info(f"Using Cloud Embeddings (Google): {self.model_name}")
+                
+                # Verify Gemini key
+                if not settings.gemini_api_key:
+                    logger.warning("GEMINI_API_KEY missing for cloud embeddings. Falling back to local.")
+                    self.provider = "local"
+                    self.model_name = "BAAI/bge-small-en-v1.5"
+            else:
+                self.provider = "local"
+                logger.info(f"Using Local Embeddings (FastEmbed): {self.model_name}")
+
+            # Initialize local model if needed
+            if self.provider == "local":
+                logger.info(f"Loading local embedding model: {self.model_name}")
+                try:
+                    self.embedding_model = TextEmbedding(model_name=self.model_name)
+                except Exception as local_e:
+                    if settings.gemini_api_key:
+                        logger.warning(f"Failed to load local model '{self.model_name}': {local_e}. Falling back to Google Cloud.")
+                        self.provider = "google"
+                        self.model_name = "text-embedding-004"
+                    else:
+                        raise local_e
+            
+            logger.info(f"Vector store initialized with {self.provider} provider and Supabase")
             
         except Exception as e:
             logger.error(f"Failed to initialize Vector Store: {e}")
             raise
 
     def _embed_texts(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings using FastEmbed locally (~10ms)"""
+        """Generate embeddings using the selected provider"""
+        if self.provider == "local":
+            return self._embed_local(texts)
+        else:
+            return self._embed_google(texts)
+
+    def _embed_local(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings using FastEmbed locally"""
         if not self.embedding_model:
-            logger.error("Embedding model not loaded")
-            return [[0.0] * 384 for _ in texts]
+            logger.error("Local embedding model not loaded")
+            return [[0.0] * self.dimensions for _ in texts]
         
         try:
-            # FastEmbed returns a generator of numpy arrays, we convert to lists
             embeddings_gen = self.embedding_model.embed(texts)
             return [embedding.tolist() for embedding in embeddings_gen]
         except Exception as e:
             logger.error(f"FastEmbed embedding error: {e}")
+            return [[0.0] * self.dimensions for _ in texts]
+
+    def _embed_google(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings using Google Generative AI Cloud API (fixed to 384d)"""
+        try:
+            import google.generativeai as genai
+            settings = get_settings()
+            genai.configure(api_key=settings.gemini_api_key)
+            
+            # Google supports batch embedding and custom dimensionality
+            # We force 384 to match the Supabase VECTOR(384) schema
+            result = genai.embed_content(
+                model=f"models/{self.model_name}",
+                content=texts,
+                task_type="retrieval_document",
+                output_dimensionality=384
+            )
+            
+            return result['embeddings'] if 'embeddings' in result else result['embedding']
+        except Exception as e:
+            logger.error(f"Google Cloud embedding error: {e}")
             return [[0.0] * 384 for _ in texts]
 
     # =====================================================
@@ -325,12 +381,12 @@ class VectorStore:
     # MAINTENANCE METHODS
     # =====================================================
     
-    async def delete_document(self, doc_id: str):
-        """Delete a document from memory collection"""
+    async def delete_document(self, doc_id: str, user_id: str):
+        """Delete a document from memory collection with user validation"""
         if not self.client: return
         try:
-            self.client.table("memories").delete().eq("id", doc_id).execute()
-            logger.info(f"Deleted document {doc_id}")
+            self.client.table("memories").delete().eq("id", doc_id).eq("user_id", user_id).execute()
+            logger.info(f"Deleted document {doc_id} for user {user_id}")
         except Exception as e:
             logger.error(f"Failed to delete document: {e}")
     

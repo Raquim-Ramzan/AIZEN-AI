@@ -295,7 +295,7 @@ async def get_system_stats() -> str
 
 ### Issue: "Model not found"
 **Solution:** Gemini Live API may not be available in your region yet.
-- Try: `models/gemini-2.0-flash-exp` (experimental)
+- Try: `models/gemini-3-flash-exp` (experimental)
 - Or check: https://ai.google.dev/gemini-api/docs/models
 
 ### Issue: "Voice 'Charon' not available"
