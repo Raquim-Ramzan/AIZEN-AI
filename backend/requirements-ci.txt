@@ -1,0 +1,35 @@
+# ==============================================================
+# AIZEN — CI-Specific Requirements (Headless/Mocked)
+# ==============================================================
+# This file is used for GitHub Actions to run tests and linting
+# without installing heavy desktop-only dependencies.
+# ==============================================================
+
+# Core Framework
+fastapi==0.110.1
+uvicorn==0.25.0
+pydantic==2.12.4
+pydantic-settings==2.12.0
+python-dotenv==1.2.1
+
+# AI & API Clients (Mocked in tests)
+google-generativeai==0.8.3
+groq>=0.13.0
+supabase>=2.3.0
+fastembed>=0.2.0
+httpx==0.27.2
+
+# Testing Tools
+pytest==8.4.2
+pytest-asyncio
+pytest-mock
+respx
+
+# Utilities
+aiofiles
+python-multipart
+Pillow
+pyjwt
+passlib
+bcrypt
+python-jose
