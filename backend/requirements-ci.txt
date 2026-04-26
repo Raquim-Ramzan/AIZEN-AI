@@ -28,7 +28,10 @@ respx
 # Utilities
 aiofiles
 aiohttp
+aiosqlite
 chardet
+numpy
+openai
 psutil
 pytz
 requests
