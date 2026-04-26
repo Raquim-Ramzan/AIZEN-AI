@@ -3,10 +3,26 @@ Registry Operations Module (Windows Only)
 Handles Windows Registry read/write operations
 """
 
-import winreg
-import asyncio
-from typing import Dict, Any, List, Optional
-import logging
+try:
+    import winreg
+    HAS_WINREG = True
+except ImportError:
+    logger.warning("winreg not found. Registry operations disabled.")
+    HAS_WINREG = False
+    # Define dummy winreg for Linux compatibility during import
+    class MockWinreg:
+        HKEY_CLASSES_ROOT = 0
+        HKEY_CURRENT_USER = 1
+        HKEY_LOCAL_MACHINE = 2
+        HKEY_USERS = 3
+        HKEY_CURRENT_CONFIG = 4
+        REG_SZ = 1
+        REG_EXPAND_SZ = 2
+        REG_BINARY = 3
+        REG_DWORD = 4
+        REG_QWORD = 5
+        REG_MULTI_SZ = 6
+    winreg = MockWinreg()
 
 from app.core.system_controller import SystemController
 

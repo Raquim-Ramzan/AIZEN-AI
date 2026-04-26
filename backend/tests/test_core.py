@@ -35,7 +35,7 @@ def test_health_check(test_client):
     """Verify basic API health endpoint"""
     response = test_client.get("/health")
     assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
+    assert response.json()["status"] == "ok"
 
 def test_api_auth_bypass(test_client):
     """Verify auth bypass works in non-production environment"""

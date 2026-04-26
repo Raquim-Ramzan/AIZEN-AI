@@ -3,19 +3,21 @@ Desktop Automation Module
 Handles keyboard, mouse, and window automation
 """
 
-import pyautogui
-import asyncio
-from typing import Dict, Any, List, Optional, Tuple
-import logging
-import time
+try:
+    import pyautogui
+    # Configure PyAutoGUI safety features
+    pyautogui.FAILSAFE = True
+    pyautogui.PAUSE = 0.1
+    HAS_PYAUTOGUI = True
+except ImportError:
+    logger.warning("PyAutoGUI not found. Desktop automation disabled.")
+    HAS_PYAUTOGUI = False
 
-from app.core.system_controller import SystemController
-
-logger = logging.getLogger(__name__)
-
-# Configure PyAutoGUI safety features
-pyautogui.FAILSAFE = True  # Move mouse to upper-left corner to abort
-pyautogui.PAUSE = 0.1  # Small delay between actions
+try:
+    import pywinauto
+    HAS_PYWINAUTO = True
+except ImportError:
+    HAS_PYWINAUTO = False
 
 
 class DesktopAutomation(SystemController):
