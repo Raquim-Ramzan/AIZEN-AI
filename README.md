@@ -5,6 +5,38 @@ AIZEN is a high-performance, asynchronous AI orchestration engine designed for p
 
 ---
 
+## ⚖️ Security Warning
+This system is capable of executing system-level operations. **Never** run the backend as root/administrator. Ensure `AIZEN_API_KEY` is properly configured in production environments to guard system tools.
+
+---
+
+## 🛠️ Quality Assurance & Engineering
+
+AIZEN is built with strict engineering standards to ensure reliability and maintainability.
+
+### 1. Linting & Formatting (Ruff)
+We use **Ruff** for lightning-fast linting and code formatting.
+```bash
+cd backend
+ruff check .      # Lint check
+ruff format .     # Auto-format code
+```
+
+### 2. Automated Testing (Pytest)
+The backend includes a comprehensive test suite that uses **Mocks** for all external APIs. Tests run entirely offline.
+```bash
+cd backend
+pytest tests/
+```
+
+### 3. Continuous Integration (CI)
+Every push to `main` triggers an automated **GitHub Action** that:
+- Runs **Ruff** for code style verification.
+- Executes **Pytest** to ensure core logic integrity.
+- Performs a **Frontend Build** to verify UI structural health.
+
+---
+
 ## 🏛️ 2026 Core Architecture
 
 ### ☁️ Cloud-Native Orchestration (Supabase)

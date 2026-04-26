@@ -1,0 +1,66 @@
+name: AIZEN CI Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff pytest pytest-asyncio pytest-mock httpx respx
+        pip install -r requirements.txt
+        
+    - name: Run Ruff (Lint & Format Check)
+      run: |
+        ruff check .
+        ruff format --check .
+        
+    - name: Run Pytest (Offline Mocks)
+      run: |
+        pytest tests/
+      env:
+        ENV: testing
+        GEMINI_API_KEY: test_key
+        SUPABASE_URL: https://test.supabase.co
+        SUPABASE_KEY: test_key
+
+  frontend-audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Run Build (Verify Integrity)
+      run: npm run build
+      env:
+        VITE_API_URL: http://localhost:8001

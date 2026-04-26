@@ -1,0 +1,40 @@
+[project]
+name = "aizen-backend"
+version = "0.1.0"
+description = "AIZEN AI Assistant Backend"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0",
+    "pydantic-settings>=2.0.0",
+    "google-generativeai>=0.3.0",
+    "groq>=0.3.0",
+    "supabase>=1.0.0",
+    "fastembed>=0.1.0",
+    "httpx>=0.24.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]
+
+[tool.ruff]
+# Target version for Python
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+# Enable Pyflakes (F), Pycodestyle (E, W), Isort (I)
+select = ["F", "E", "W", "I", "N", "UP", "B"]
+ignore = ["E501"] # Line too long (handled by formatter)
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
