@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from app.core.system_controller import SystemController
@@ -24,7 +25,10 @@ class DesktopAutomation(SystemController):
     """Handles desktop automation operations"""
 
     async def type_text(
-        self, text: str, interval: float = 0.0, approval_callback: callable | None = None
+        self,
+        text: str,
+        interval: float = 0.0,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Type text using keyboard simulation
@@ -55,7 +59,7 @@ class DesktopAutomation(SystemController):
         key: str,
         presses: int = 1,
         interval: float = 0.0,
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Press a key or key combination
@@ -82,7 +86,9 @@ class DesktopAutomation(SystemController):
             approval_callback=approval_callback,
         )
 
-    async def hotkey(self, *keys: str, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def hotkey(
+        self, *keys: str, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Press a key combination (hotkey)
 
@@ -113,7 +119,7 @@ class DesktopAutomation(SystemController):
         clicks: int = 1,
         interval: float = 0.0,
         button: str = "left",
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Click mouse at position
@@ -154,7 +160,11 @@ class DesktopAutomation(SystemController):
         )
 
     async def move_mouse(
-        self, x: int, y: int, duration: float = 0.0, approval_callback: callable | None = None
+        self,
+        x: int,
+        y: int,
+        duration: float = 0.0,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Move mouse to position
@@ -187,7 +197,7 @@ class DesktopAutomation(SystemController):
         y: int,
         duration: float = 0.0,
         button: str = "left",
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Drag mouse to position
@@ -222,7 +232,7 @@ class DesktopAutomation(SystemController):
         clicks: int,
         x: int | None = None,
         y: int | None = None,
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Scroll mouse wheel
@@ -252,7 +262,9 @@ class DesktopAutomation(SystemController):
             approval_callback=approval_callback,
         )
 
-    async def get_mouse_position(self, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def get_mouse_position(
+        self, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Get current mouse position
 
@@ -275,7 +287,9 @@ class DesktopAutomation(SystemController):
             approval_callback=approval_callback,
         )
 
-    async def get_screen_size(self, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def get_screen_size(
+        self, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Get screen size
 
@@ -299,7 +313,10 @@ class DesktopAutomation(SystemController):
         )
 
     async def locate_on_screen(
-        self, image_path: str, confidence: float = 0.9, approval_callback: callable | None = None
+        self,
+        image_path: str,
+        confidence: float = 0.9,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Locate an image on screen

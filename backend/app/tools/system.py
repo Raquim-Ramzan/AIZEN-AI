@@ -2,7 +2,12 @@ import logging
 import platform
 from typing import Any
 
-import psutil
+try:
+    import psutil
+
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
 
 from app.tools.base import BaseTool
 
@@ -57,6 +62,9 @@ class SystemTool(BaseTool):
 
     async def _get_resources(self) -> dict[str, Any]:
         """Get system resource usage"""
+        if not HAS_PSUTIL:
+            return {"operation": "resources", "error": "psutil not available in this environment"}
+
         memory = psutil.virtual_memory()
         cpu_percent = psutil.cpu_percent(interval=1)
 
@@ -74,6 +82,9 @@ class SystemTool(BaseTool):
 
     async def _get_processes(self) -> dict[str, Any]:
         """Get running processes info"""
+        if not HAS_PSUTIL:
+            return {"operation": "processes", "error": "psutil not available in this environment"}
+
         processes = []
         for proc in psutil.process_iter(["pid", "name", "cpu_percent", "memory_percent"]):
             try:

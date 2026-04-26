@@ -1,8 +1,14 @@
 import logging
 import platform
+from collections.abc import Callable
 from typing import Any
 
-import psutil
+try:
+    import psutil
+
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
 
 from app.core.system_controller import SystemController
 
@@ -12,7 +18,9 @@ logger = logging.getLogger(__name__)
 class SystemInfo(SystemController):
     """Handles system information gathering"""
 
-    async def get_system_info(self, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def get_system_info(
+        self, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Get comprehensive system information
 
@@ -51,7 +59,7 @@ class SystemInfo(SystemController):
         )
 
     async def get_cpu_info(
-        self, interval: float = 1.0, approval_callback: callable | None = None
+        self, interval: float = 1.0, approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         Get CPU information and usage
@@ -95,7 +103,9 @@ class SystemInfo(SystemController):
             approval_callback=approval_callback,
         )
 
-    async def get_memory_info(self, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def get_memory_info(
+        self, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Get memory information and usage
 
@@ -142,7 +152,7 @@ class SystemInfo(SystemController):
         )
 
     async def get_disk_info(
-        self, path: str = "/", approval_callback: callable | None = None
+        self, path: str = "/", approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         Get disk information and usage
@@ -204,7 +214,9 @@ class SystemInfo(SystemController):
             approval_callback=approval_callback,
         )
 
-    async def get_network_info(self, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def get_network_info(
+        self, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Get network information and statistics
 
@@ -260,7 +272,9 @@ class SystemInfo(SystemController):
             approval_callback=approval_callback,
         )
 
-    async def get_battery_info(self, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def get_battery_info(
+        self, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Get battery information (for laptops)
 
@@ -272,6 +286,9 @@ class SystemInfo(SystemController):
         """
 
         async def executor(params: dict[str, Any]) -> dict[str, Any]:
+            if not HAS_PSUTIL:
+                return {"error": "psutil not available in this environment"}
+
             battery = psutil.sensors_battery()
 
             if battery is None:
@@ -299,7 +316,9 @@ class SystemInfo(SystemController):
             approval_callback=approval_callback,
         )
 
-    async def get_boot_time(self, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def get_boot_time(
+        self, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Get system boot time
 

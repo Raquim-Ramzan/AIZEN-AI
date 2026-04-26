@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from app.core.system_controller import SystemController
@@ -79,7 +80,7 @@ class RegistryOperations(SystemController):
         return hive, subkey
 
     async def read_value(
-        self, path: str, value_name: str = "", approval_callback: callable | None = None
+        self, path: str, value_name: str = "", approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         Read a registry value
@@ -136,7 +137,7 @@ class RegistryOperations(SystemController):
         value_name: str,
         value: Any,
         value_type: str = "REG_SZ",
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Write a registry value
@@ -190,7 +191,7 @@ class RegistryOperations(SystemController):
         )
 
     async def delete_value(
-        self, path: str, value_name: str, approval_callback: callable | None = None
+        self, path: str, value_name: str, approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         Delete a registry value
@@ -234,7 +235,7 @@ class RegistryOperations(SystemController):
         )
 
     async def list_subkeys(
-        self, path: str, approval_callback: callable | None = None
+        self, path: str, approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         List all subkeys in a registry key
@@ -280,7 +281,7 @@ class RegistryOperations(SystemController):
         )
 
     async def list_values(
-        self, path: str, approval_callback: callable | None = None
+        self, path: str, approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         List all values in a registry key

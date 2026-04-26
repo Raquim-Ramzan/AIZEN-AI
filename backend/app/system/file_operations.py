@@ -6,6 +6,7 @@ Handles file system operations with security checks
 import glob
 import logging
 import shutil
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +21,10 @@ class FileOperations(SystemController):
     """Handles file system operations"""
 
     async def read_file(
-        self, path: str, encoding: str | None = None, approval_callback: callable | None = None
+        self,
+        path: str,
+        encoding: str | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Read contents of a file
@@ -77,7 +81,7 @@ class FileOperations(SystemController):
         content: str,
         encoding: str = "utf-8",
         create_dirs: bool = True,
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Write content to a file
@@ -120,13 +124,16 @@ class FileOperations(SystemController):
         )
 
     async def create_file(
-        self, path: str, content: str = "", approval_callback: callable | None = None
+        self, path: str, content: str = "", approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """Create a new file"""
         return await self.write_file(path, content, approval_callback=approval_callback)
 
     async def delete_file(
-        self, path: str, use_recycle_bin: bool = True, approval_callback: callable | None = None
+        self,
+        path: str,
+        use_recycle_bin: bool = True,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Delete a file
@@ -178,7 +185,7 @@ class FileOperations(SystemController):
         path: str,
         recursive: bool = False,
         pattern: str = "*",
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         List contents of a directory
@@ -248,7 +255,7 @@ class FileOperations(SystemController):
         start_path: str,
         pattern: str,
         max_results: int = 100,
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Search for files matching a pattern
@@ -302,7 +309,7 @@ class FileOperations(SystemController):
         )
 
     async def create_directory(
-        self, path: str, parents: bool = True, approval_callback: callable | None = None
+        self, path: str, parents: bool = True, approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         Create a directory
@@ -331,7 +338,7 @@ class FileOperations(SystemController):
         )
 
     async def copy_file(
-        self, source: str, destination: str, approval_callback: callable | None = None
+        self, source: str, destination: str, approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         Copy a file or directory
@@ -368,7 +375,7 @@ class FileOperations(SystemController):
         )
 
     async def move_file(
-        self, source: str, destination: str, approval_callback: callable | None = None
+        self, source: str, destination: str, approval_callback: Callable[..., Any] | None = None
     ) -> dict[str, Any]:
         """
         Move a file or directory

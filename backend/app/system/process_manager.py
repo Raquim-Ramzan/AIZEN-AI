@@ -1,8 +1,14 @@
 import logging
 import subprocess
+from collections.abc import Callable
 from typing import Any
 
-import psutil
+try:
+    import psutil
+
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
 
 from app.core.system_controller import SystemController
 
@@ -16,7 +22,7 @@ class ProcessManager(SystemController):
         self,
         sort_by: str = "cpu",
         limit: int | None = None,
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         List all running processes
@@ -31,6 +37,9 @@ class ProcessManager(SystemController):
         """
 
         async def executor(params: dict[str, Any]) -> dict[str, Any]:
+            if not HAS_PSUTIL:
+                return {"error": "psutil not available in this environment"}
+
             processes = []
 
             for proc in psutil.process_iter(
@@ -82,7 +91,7 @@ class ProcessManager(SystemController):
         self,
         pid: int | None = None,
         name: str | None = None,
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Get detailed information about a process
@@ -97,6 +106,8 @@ class ProcessManager(SystemController):
         """
 
         async def executor(params: dict[str, Any]) -> dict[str, Any]:
+            if not HAS_PSUTIL:
+                return {"error": "psutil not available in this environment"}
             if params["pid"]:
                 try:
                     proc = psutil.Process(params["pid"])
@@ -147,7 +158,7 @@ class ProcessManager(SystemController):
         args: list[str] | None = None,
         cwd: str | None = None,
         wait: bool = False,
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Start a new process
@@ -197,7 +208,7 @@ class ProcessManager(SystemController):
         pid: int | None = None,
         name: str | None = None,
         force: bool = False,
-        approval_callback: callable | None = None,
+        approval_callback: Callable[..., Any] | None = None,
     ) -> dict[str, Any]:
         """
         Terminate a process
@@ -213,6 +224,8 @@ class ProcessManager(SystemController):
         """
 
         async def executor(params: dict[str, Any]) -> dict[str, Any]:
+            if not HAS_PSUTIL:
+                return {"error": "psutil not available in this environment"}
             terminated = []
 
             if params["pid"]:
@@ -260,7 +273,9 @@ class ProcessManager(SystemController):
             approval_callback=approval_callback,
         )
 
-    async def get_system_stats(self, approval_callback: callable | None = None) -> dict[str, Any]:
+    async def get_system_stats(
+        self, approval_callback: Callable[..., Any] | None = None
+    ) -> dict[str, Any]:
         """
         Get overall system statistics
 
@@ -272,6 +287,8 @@ class ProcessManager(SystemController):
         """
 
         async def executor(params: dict[str, Any]) -> dict[str, Any]:
+            if not HAS_PSUTIL:
+                return {"error": "psutil not available in this environment"}
             # CPU stats
             cpu_percent = psutil.cpu_percent(interval=1, percpu=True)
             cpu_freq = psutil.cpu_freq()
